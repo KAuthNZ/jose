@@ -16,6 +16,16 @@ pub enum Algorithm {
 }
 
 impl Algorithm {
+    /// Every value of `alg`: the signature algorithms, then the key management ones, each in the
+    /// order of its own `ALL`.
+    pub fn all() -> impl Iterator<Item = Self> {
+        SigningAlgorithm::ALL.into_iter().map(Self::Signing).chain(
+            KeyManagementAlgorithm::ALL
+                .into_iter()
+                .map(Self::KeyManagement),
+        )
+    }
+
     /// Exact and case-sensitive, `EdDSA` read as `Ed25519`. No name is in both.
     pub fn from_name(name: &str) -> Option<Self> {
         SigningAlgorithm::from_name(name)
@@ -116,5 +126,42 @@ mod tests {
         assert_eq!(ecdh.name(), "ECDH-ES");
         assert!(ecdh.accepts(KeyType::Okp, Some(Curve::X25519)));
         assert!(!ecdh.accepts(KeyType::Okp, Some(Curve::Ed25519)));
+    }
+
+    #[test]
+    fn all_holds_every_algorithm_of_both_kinds_once() {
+        let all: Vec<Algorithm> = Algorithm::all().collect();
+
+        assert_eq!(
+            all.len(),
+            SigningAlgorithm::ALL.len() + KeyManagementAlgorithm::ALL.len()
+        );
+
+        for alg in SigningAlgorithm::ALL {
+            assert_eq!(
+                all.iter()
+                    .filter(|a| **a == Algorithm::Signing(alg))
+                    .count(),
+                1,
+                "{alg:?}"
+            );
+        }
+
+        for alg in KeyManagementAlgorithm::ALL {
+            assert_eq!(
+                all.iter()
+                    .filter(|a| **a == Algorithm::KeyManagement(alg))
+                    .count(),
+                1,
+                "{alg:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn every_algorithm_of_all_is_read_back_by_its_name() {
+        for alg in Algorithm::all() {
+            assert_eq!(Algorithm::from_name(alg.name()), Some(alg), "{alg:?}");
+        }
     }
 }
