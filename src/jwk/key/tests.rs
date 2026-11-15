@@ -24,6 +24,8 @@ use crate::jwk::members::KidErrors;
 
 use crate::jwk::members::KeyUseErrors;
 
+use crate::jwk::key_types::AnySecretKey;
+
 use crate::jwk::key_types::AnyPublicKey;
 
 use crate::jwk::members::KeyMetadataErrors;
@@ -250,4 +252,51 @@ fn the_symmetric_keys_of_rfc_7517_are_read_as_secret_by_their_size() {
         secret(json!({ "kty": "oct", "alg": "A128KW", "k": "GawgguFyGrWKav7AX4VKUg" })).err(),
         Some(JwkErrors::Fit(FitErrors::NoAlgorithm))
     );
+}
+
+#[test]
+fn a_public_key_is_cloned() {
+    let jwk = public(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "kid": "1" })).unwrap();
+
+    let copy = jwk.clone();
+
+    assert_eq!(copy.kid(), Some("1"));
+
+    assert_eq!(copy.held.material, jwk.held.material);
+
+    assert_eq!(copy.held.candidates, jwk.held.candidates);
+}
+
+#[test]
+fn a_private_key_is_duplicated_with_its_kid_material_and_candidates() {
+    let jwk = private(json!({
+        "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "d": EC_D, "kid": "1",
+    }))
+    .unwrap();
+
+    let copy = jwk.duplicate();
+
+    assert_eq!(copy.kid(), Some("1"));
+
+    assert_eq!(copy.held.material.public(), jwk.held.material.public());
+
+    assert_eq!(copy.held.candidates, jwk.held.candidates);
+}
+
+#[test]
+fn a_secret_is_duplicated_byte_for_byte() {
+    let jwk = secret(json!({
+        "kty": "oct", "k": "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow",
+    }))
+    .unwrap();
+
+    let copy = jwk.duplicate();
+
+    let AnySecretKey::Oct(original) = &jwk.held.material;
+
+    let AnySecretKey::Oct(duplicated) = &copy.held.material;
+
+    assert_eq!(duplicated.secret(), original.secret());
+
+    assert_eq!(copy.held.candidates, jwk.held.candidates);
 }

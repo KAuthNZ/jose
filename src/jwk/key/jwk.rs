@@ -1,5 +1,7 @@
 use crate::jwk::members::Kid;
 
+use crate::jwk::key_types::Duplicate;
+
 use super::holds::Holds;
 
 /// One JWK in a mode. `Jwk<Public>`, `Jwk<Private>` and `Jwk<Secret>` are read and judged, and
@@ -32,5 +34,60 @@ where
 {
     pub fn kid(&self) -> Option<&str> {
         self.kid.as_ref().map(Kid::as_str)
+    }
+}
+
+/// Only where what it holds is public: a secret is copied by [`Jwk::duplicate`].
+impl<M> Clone for Jwk<M>
+where
+    M: Holds,
+    M::Held: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            kid: self.kid.clone(),
+            held: self.held.clone(),
+        }
+    }
+}
+
+impl<M> Jwk<M>
+where
+    M: Holds,
+    M::Held: Duplicate,
+{
+    /// A copy of a private or secret key, asked for by name: nothing copies one without saying
+    /// so. Each copy is wiped on drop, as the original is.
+    ///
+    /// ```
+    /// use kauthnz_jose::jwk::Jwk;
+    ///
+    /// // RFC 8037 A.1.
+    /// let private = Jwk::read_private(br#"{"kty": "OKP", "crv": "Ed25519",
+    ///     "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+    ///     "d": "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"}"#)?;
+    ///
+    /// let copy = private.duplicate();
+    /// # Ok::<(), kauthnz_jose::jwk::JwkErrors>(())
+    /// ```
+    ///
+    /// Not `Clone`:
+    ///
+    /// ```compile_fail,E0599
+    /// use kauthnz_jose::jwk::Jwk;
+    ///
+    /// // RFC 8037 A.1.
+    /// let private = Jwk::read_private(br#"{"kty": "OKP", "crv": "Ed25519",
+    ///     "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+    ///     "d": "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"}"#)?;
+    ///
+    /// let copy = private.clone();
+    /// # Ok::<(), kauthnz_jose::jwk::JwkErrors>(())
+    /// ```
+    pub fn duplicate(&self) -> Self {
+        Self {
+            kid: self.kid.clone(),
+            held: self.held.duplicate(),
+        }
     }
 }
