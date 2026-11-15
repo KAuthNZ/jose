@@ -24,4 +24,7 @@ pub use key_types::OctErrors;
 
 pub use key_types::OkpErrors;
 
+#[cfg(feature = "rsa")]
+pub use key_types::RsaErrors;
+
 pub use decoding::JwkDecodingErrors;
