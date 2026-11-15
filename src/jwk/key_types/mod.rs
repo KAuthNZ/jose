@@ -9,7 +9,11 @@ mod rsa;
 
 mod public_members;
 
+mod classification;
+
 pub use ec::EcErrors;
+
+pub use classification::ClassificationErrors;
 
 pub use oct::OctErrors;
 
@@ -38,3 +42,11 @@ pub(crate) use rsa::RsaPrivateKey;
 pub(in crate::jwk) use rsa::RsaPrivateKeyMembers;
 
 pub(crate) use public_members::PublicMembers;
+
+pub(crate) use classification::KeyShape;
+
+pub(crate) use classification::AnyPublicKey;
+
+pub(crate) use classification::AnySecretKey;
+
+pub(crate) use classification::AnyPrivateKey;
