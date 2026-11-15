@@ -22,6 +22,8 @@ pub use raw::RawJwkErrors;
 
 pub use members::KeyOp;
 
+pub use members::AlgErrors;
+
 pub use members::KidErrors;
 
 pub use members::KeyOpsErrors;
