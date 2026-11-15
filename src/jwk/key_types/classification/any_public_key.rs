@@ -6,7 +6,6 @@ use super::super::ec::EcPublicKey;
 
 use super::super::okp::OkpPublicKey;
 
-#[cfg(feature = "rsa")]
 use super::super::rsa::RsaPublicKey;
 
 use super::members::required;
@@ -31,7 +30,6 @@ pub(crate) enum AnyPublicKey {
 
     Okp(OkpPublicKey),
 
-    #[cfg(feature = "rsa")]
     Rsa(RsaPublicKey),
 }
 
@@ -67,7 +65,6 @@ impl AnyPublicKey {
                 Ok(Self::Okp(OkpPublicKey::read(&crv, &x)?))
             }
 
-            #[cfg(feature = "rsa")]
             KeyType::Rsa => {
                 let n = required(&mut material, "n")?;
 
@@ -81,9 +78,6 @@ impl AnyPublicKey {
             KeyType::Oct => Err(ClassificationErrors::NoPublicSide),
 
             KeyType::Akp => Err(ClassificationErrors::UnsupportedKty),
-
-            #[cfg(not(feature = "rsa"))]
-            KeyType::Rsa => Err(ClassificationErrors::UnsupportedKty),
         }
     }
 
@@ -93,7 +87,6 @@ impl AnyPublicKey {
 
             Self::Okp(key) => KeyShape::Okp(key.curve()),
 
-            #[cfg(feature = "rsa")]
             Self::Rsa(_) => KeyShape::Rsa,
         }
     }
@@ -105,7 +98,6 @@ impl AnyPublicKey {
 
             Self::Okp(key) => key.public_members(),
 
-            #[cfg(feature = "rsa")]
             Self::Rsa(key) => key.public_members(),
         }
     }

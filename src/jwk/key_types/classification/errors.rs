@@ -6,7 +6,6 @@ use super::super::okp::OkpErrors;
 
 use super::super::oct::OctErrors;
 
-#[cfg(feature = "rsa")]
 use super::super::rsa::RsaErrors;
 
 /// Why one JWK was refused while its `kty` and members were being matched to a family, or while
@@ -43,7 +42,6 @@ pub enum ClassificationErrors {
 
     Oct(OctErrors),
 
-    #[cfg(feature = "rsa")]
     Rsa(RsaErrors),
 }
 
@@ -65,7 +63,6 @@ impl From<OctErrors> for ClassificationErrors {
     }
 }
 
-#[cfg(feature = "rsa")]
 impl From<RsaErrors> for ClassificationErrors {
     fn from(error: RsaErrors) -> Self {
         Self::Rsa(error)
@@ -97,7 +94,6 @@ impl fmt::Display for ClassificationErrors {
 
             Self::Oct(error) => error.fmt(f),
 
-            #[cfg(feature = "rsa")]
             Self::Rsa(error) => error.fmt(f),
         }
     }

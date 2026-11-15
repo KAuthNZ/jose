@@ -12,7 +12,6 @@ pub(crate) enum KeyShape {
         len: usize,
     },
 
-    #[cfg(feature = "rsa")]
     Rsa,
 
     Ec(Curve),
@@ -29,7 +28,6 @@ impl KeyShape {
 
             Self::Oct { .. } => KeyType::Oct,
 
-            #[cfg(feature = "rsa")]
             Self::Rsa => KeyType::Rsa,
         }
     }
@@ -41,7 +39,6 @@ impl KeyShape {
 
             Self::Oct { .. } => None,
 
-            #[cfg(feature = "rsa")]
             Self::Rsa => None,
         }
     }
@@ -53,7 +50,6 @@ impl KeyShape {
 
             Self::Ec(_) | Self::Okp(_) => None,
 
-            #[cfg(feature = "rsa")]
             Self::Rsa => None,
         }
     }

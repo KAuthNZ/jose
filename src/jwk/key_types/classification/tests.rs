@@ -389,14 +389,6 @@ fn what_the_family_refuses_comes_through() {
     );
 }
 
-#[cfg(not(feature = "rsa"))]
-#[test]
-fn rsa_is_unsupported_without_its_feature() {
-    let key = json!({ "kty": "RSA", "n": "AQAB", "e": "AQAB" });
-
-    assert_eq!(refused_public(key), ClassificationErrors::UnsupportedKty);
-}
-
 #[test]
 fn a_classified_key_says_its_kty_and_crv() {
     use crate::jwa::Curve;
@@ -432,7 +424,6 @@ fn a_classified_key_says_its_kty_and_crv() {
     );
 }
 
-#[cfg(feature = "rsa")]
 mod rsa {
     use serde_json::Value;
 

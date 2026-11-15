@@ -6,10 +6,8 @@ use super::super::ec::EcPrivateKey;
 
 use super::super::okp::OkpPrivateKey;
 
-#[cfg(feature = "rsa")]
 use super::super::rsa::RsaPrivateKey;
 
-#[cfg(feature = "rsa")]
 use super::super::rsa::RsaPrivateKeyMembers;
 
 use super::members::required;
@@ -29,7 +27,6 @@ pub(crate) enum AnyPrivateKey {
 
     Okp(OkpPrivateKey),
 
-    #[cfg(feature = "rsa")]
     Rsa(RsaPrivateKey),
 }
 
@@ -66,7 +63,6 @@ impl AnyPrivateKey {
                 Ok(Self::Okp(OkpPrivateKey::read(&crv, &x, &d)?))
             }
 
-            #[cfg(feature = "rsa")]
             KeyType::Rsa => {
                 let n = required(&mut material, "n")?;
 
@@ -100,9 +96,6 @@ impl AnyPrivateKey {
 
             KeyType::Oct => Err(ClassificationErrors::SymmetricKty),
 
-            #[cfg(not(feature = "rsa"))]
-            KeyType::Rsa => Err(ClassificationErrors::UnsupportedKty),
-
             KeyType::Akp => Err(ClassificationErrors::UnsupportedKty),
         }
     }
@@ -113,7 +106,6 @@ impl AnyPrivateKey {
 
             Self::Okp(key) => KeyShape::Okp(key.curve()),
 
-            #[cfg(feature = "rsa")]
             Self::Rsa(_) => KeyShape::Rsa,
         }
     }
@@ -125,7 +117,6 @@ impl AnyPrivateKey {
 
             Self::Okp(key) => AnyPublicKey::Okp(key.public()),
 
-            #[cfg(feature = "rsa")]
             Self::Rsa(key) => AnyPublicKey::Rsa(key.public()),
         }
     }

@@ -53,23 +53,18 @@ features = ["ecdsa"]
 version = "0.14.3"
 default-features = false
 
-# The backend of RSA keys, only with the `rsa` feature. RUSTSEC-2023-0071 (Marvin) lists 0.10.0 as
-# patched: constant-time arithmetic through crypto-bigint, and its private keys wiped on drop.
+# The backend of RSA keys. RUSTSEC-2023-0071 (Marvin) lists 0.10.0 as patched: constant-time
+# arithmetic through crypto-bigint, and its private keys wiped on drop.
 [dependencies.rsa]
 version = "0.10.0"
-optional = true
 default-features = false
 
-# Only with the `rsa` feature, to compare in constant time the dp, dq and qi of a JWK with the
-# ones the backend computes. Already in the tree through rsa.
+# To compare in constant time the dp, dq and qi of a JWK with the ones the backend computes.
+# Already in the tree through elliptic-curve and rsa.
 [dependencies.crypto-bigint]
 version = "0.7.11"
-optional = true
 default-features = false
 features = ["alloc", "zeroize"]
-
-[features]
-rsa = ["dep:rsa", "dep:crypto-bigint"]
 
 [lints.rust]
 unsafe_code = "forbid"
