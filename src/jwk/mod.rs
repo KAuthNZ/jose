@@ -1,5 +1,7 @@
 mod raw;
 
+mod fit;
+
 mod mode;
 
 mod members;
@@ -17,6 +19,8 @@ pub use mode::Secret;
 pub use mode::Private;
 
 pub use mode::Unbound;
+
+pub use fit::FitErrors;
 
 pub use raw::RawJwkErrors;
 
