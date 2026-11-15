@@ -18,8 +18,8 @@ signing_markers!(Rs256, Rs384, Rs512);
 
 signing_markers!(Ps256, Ps384, Ps512);
 
-signing_markers!(Es256, Es384, Es512);
+signing_markers!(Es256, Es384, Es512, Es256k);
 
-signing_markers!(Ed25519);
+signing_markers!(Ed25519, Ed448);
 
 signing_markers!(MlDsa44, MlDsa65, MlDsa87,);
