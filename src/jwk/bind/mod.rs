@@ -1,3 +1,5 @@
+mod ec;
+
 mod okp;
 
 mod bound;

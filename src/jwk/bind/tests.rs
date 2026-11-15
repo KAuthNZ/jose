@@ -2,6 +2,12 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use crate::jwa::Es256;
+
+use crate::jwa::Es384;
+
+use crate::jwa::Es512;
+
 use crate::jwa::Ed25519;
 
 use crate::jwk::key::Jwk;
@@ -86,4 +92,115 @@ fn a_private_key_kept_by_duplicating_it_binds_twice() {
     let second = jwk.bind::<Ed25519>().unwrap();
 
     assert_eq!(first.held.public(), second.held.public());
+}
+
+const EC_RFC_KEYS: &str = include_str!("../../../testdata/ec/rfc_keys.json");
+
+fn ec_keys() -> Vec<Value> {
+    match serde_json::from_str(EC_RFC_KEYS).unwrap() {
+        Value::Array(keys) => keys,
+
+        other => panic!("not an array: {other}"),
+    }
+}
+
+/// The key of the RFCs as a JWK: `source` dropped, `kty` added.
+fn ec_jwk(key: &Value) -> Value {
+    let mut jwk = key.clone();
+
+    let members = jwk.as_object_mut().unwrap();
+
+    members.remove("source");
+
+    members.insert("kty".to_owned(), json!("EC"));
+
+    jwk
+}
+
+/// The public JWK of a key of the RFCs: `d` dropped.
+fn ec_public_jwk(key: &Value) -> Value {
+    let mut jwk = ec_jwk(key);
+
+    jwk.as_object_mut().unwrap().remove("d");
+
+    jwk
+}
+
+#[test]
+fn every_ec_key_of_the_rfcs_is_bound_to_the_algorithm_of_its_curve() {
+    let keys = ec_keys();
+
+    assert_eq!(keys.len(), 15);
+
+    for key in &keys {
+        let source = key.get("source").and_then(Value::as_str).unwrap();
+
+        let public = public(ec_public_jwk(key));
+
+        let bound = match key.get("crv").and_then(Value::as_str).unwrap() {
+            "P-256" => public.bind::<Es256>().map(|_| ()),
+
+            "P-384" => public.bind::<Es384>().map(|_| ()),
+
+            "P-521" => public.bind::<Es512>().map(|_| ()),
+
+            other => panic!("{source}: {other}"),
+        };
+
+        assert_eq!(bound, Ok(()), "{source}");
+    }
+}
+
+#[test]
+fn every_ec_private_key_of_the_rfcs_is_bound_with_its_public_key() {
+    let keys = ec_keys();
+
+    let privates: Vec<&Value> = keys.iter().filter(|key| key.get("d").is_some()).collect();
+
+    assert!(!privates.is_empty());
+
+    for key in privates {
+        let source = key.get("source").and_then(Value::as_str).unwrap();
+
+        let private = private(ec_jwk(key));
+
+        let public = public(ec_public_jwk(key));
+
+        match key.get("crv").and_then(Value::as_str).unwrap() {
+            "P-256" => assert_eq!(
+                private.bind::<Es256>().unwrap().held.public(),
+                public.bind::<Es256>().unwrap().held,
+                "{source}"
+            ),
+
+            "P-384" => assert_eq!(
+                private.bind::<Es384>().unwrap().held.public(),
+                public.bind::<Es384>().unwrap().held,
+                "{source}"
+            ),
+
+            "P-521" => assert_eq!(
+                private.bind::<Es512>().unwrap().held.public(),
+                public.bind::<Es512>().unwrap().held,
+                "{source}"
+            ),
+
+            other => panic!("{source}: {other}"),
+        }
+    }
+}
+
+#[test]
+fn an_ec_key_is_not_a_candidate_of_another_curve() {
+    let p256 = || public(json!({ "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y }));
+
+    assert_eq!(
+        p256().bind::<Es384>().err(),
+        Some(BindErrors::NotACandidate)
+    );
+
+    assert_eq!(
+        p256().bind::<Es512>().err(),
+        Some(BindErrors::NotACandidate)
+    );
 }
