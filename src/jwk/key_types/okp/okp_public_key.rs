@@ -4,25 +4,25 @@ use crate::jwa::Curve;
 
 use crate::jwa::KeyType;
 
-use super::ed25519;
-
 use super::curve::okp_curve;
 
 use super::errors::OkpErrors;
 
 use crate::jwk::key_types::PublicMembers;
 
+use super::ed25519_public_key::Ed25519PublicKey;
+
 /// The public key of an OKP JWK (RFC 8037 §2): one a real signer could have.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OkpPublicKey {
-    Ed25519(ed25519_dalek::VerifyingKey),
+    Ed25519(Ed25519PublicKey),
 }
 
 impl OkpPublicKey {
     /// `crv` and `x` as they came in the JWK.
     pub(in crate::jwk) fn read(crv: &str, x: &str) -> Result<Self, OkpErrors> {
         Ok(match okp_curve(crv)? {
-            Curve::Ed25519 => Self::Ed25519(ed25519::public_key(x)?),
+            Curve::Ed25519 => Self::Ed25519(Ed25519PublicKey::read(x)?),
 
             _ => return Err(OkpErrors::UnsupportedCurve),
         })

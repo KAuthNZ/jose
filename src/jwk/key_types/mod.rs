@@ -34,6 +34,10 @@ pub(crate) use oct::OctSecretKey;
 
 pub(crate) use okp::OkpPrivateKey;
 
+pub(crate) use okp::Ed25519PublicKey;
+
+pub(crate) use okp::Ed25519PrivateKey;
+
 pub(crate) use rsa::RsaPrivateKey;
 
 pub(in crate::jwk) use rsa::RsaPrivateKeyMembers;

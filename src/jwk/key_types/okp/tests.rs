@@ -88,7 +88,7 @@ fn reads_the_public_key_of_rfc_8037() {
 fn reads_the_private_key_of_rfc_8037() {
     let okp = private("Ed25519", X, D).unwrap();
 
-    assert!(matches!(okp, OkpPrivateKey::Ed25519 { .. }));
+    assert!(matches!(okp, OkpPrivateKey::Ed25519(_)));
 
     assert_eq!(okp.curve(), Curve::Ed25519);
 }
