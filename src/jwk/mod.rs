@@ -18,4 +18,6 @@ pub use mode::Unbound;
 
 pub use raw::RawJwkErrors;
 
+pub use key_types::OkpErrors;
+
 pub use decoding::JwkDecodingErrors;
