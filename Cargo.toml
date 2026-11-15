@@ -18,6 +18,12 @@ version = "1.0.154"
 version = "1.8.3"
 features = ["alloc"]
 
+# The members of a JWK, secret or not, wiped once read or refused.
+[dependencies.zeroize]
+version = "1.9.1"
+default-features = false
+features = ["alloc"]
+
 [lints.rust]
 unsafe_code = "forbid"
 
