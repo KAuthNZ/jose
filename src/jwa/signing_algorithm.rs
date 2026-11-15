@@ -15,7 +15,8 @@ use super::constants::EDDSA;
 use super::key_type::KeyType;
 
 /// The signature algorithms of the JSON Web Signature and Encryption Algorithms registry
-/// (RFC 7518 §7.1.2, RFC 9864, draft-ietf-cose-dilithium), read by this library or not.
+/// (RFC 7518 §7.1.2, RFC 8812 §3.2, RFC 9864, draft-ietf-cose-dilithium), read by this library or
+/// not. `EdDSA` is not one of them: it is read as `Ed25519`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SigningAlgorithm {
     Hs256,
@@ -42,7 +43,11 @@ pub enum SigningAlgorithm {
 
     Es512,
 
+    Es256k,
+
     Ed25519,
+
+    Ed448,
 
     MlDsa44,
 
@@ -52,7 +57,7 @@ pub enum SigningAlgorithm {
 }
 
 impl SigningAlgorithm {
-    pub const ALL: [Self; 16] = [
+    pub const ALL: [Self; 18] = [
         Self::Hs256,
         Self::Hs384,
         Self::Hs512,
@@ -65,7 +70,9 @@ impl SigningAlgorithm {
         Self::Es256,
         Self::Es384,
         Self::Es512,
+        Self::Es256k,
         Self::Ed25519,
+        Self::Ed448,
         Self::MlDsa44,
         Self::MlDsa65,
         Self::MlDsa87,
@@ -107,7 +114,11 @@ impl SigningAlgorithm {
 
             Self::Es512 => "ES512",
 
+            Self::Es256k => "ES256K",
+
             Self::Ed25519 => "Ed25519",
+
+            Self::Ed448 => "Ed448",
 
             Self::MlDsa44 => "ML-DSA-44",
 
@@ -125,9 +136,9 @@ impl SigningAlgorithm {
                 KeyType::Rsa
             }
 
-            Self::Es256 | Self::Es384 | Self::Es512 => KeyType::Ec,
+            Self::Es256 | Self::Es384 | Self::Es512 | Self::Es256k => KeyType::Ec,
 
-            Self::Ed25519 => KeyType::Okp,
+            Self::Ed25519 | Self::Ed448 => KeyType::Okp,
 
             Self::MlDsa44 | Self::MlDsa65 | Self::MlDsa87 => KeyType::Akp,
         }
@@ -141,7 +152,11 @@ impl SigningAlgorithm {
 
             Self::Es512 => Some(Curve::P521),
 
+            Self::Es256k => Some(Curve::Secp256k1),
+
             Self::Ed25519 => Some(Curve::Ed25519),
+
+            Self::Ed448 => Some(Curve::Ed448),
 
             Self::Hs256
             | Self::Hs384
@@ -179,7 +194,11 @@ impl SigningAlgorithm {
 
             Self::Es512 => Some(132),
 
+            Self::Es256k => Some(64),
+
             Self::Ed25519 => Some(64),
+
+            Self::Ed448 => Some(114),
 
             Self::MlDsa44 => Some(2420),
 
@@ -198,6 +217,8 @@ impl SigningAlgorithm {
         match self {
             Self::Ed25519 => Some(32),
 
+            Self::Ed448 => Some(57),
+
             Self::MlDsa44 => Some(1312),
 
             Self::MlDsa65 => Some(1952),
@@ -215,7 +236,8 @@ impl SigningAlgorithm {
             | Self::Ps512
             | Self::Es256
             | Self::Es384
-            | Self::Es512 => None,
+            | Self::Es512
+            | Self::Es256k => None,
         }
     }
 
@@ -223,6 +245,8 @@ impl SigningAlgorithm {
     pub const fn private_param_len(self) -> Option<usize> {
         match self {
             Self::Ed25519 | Self::MlDsa44 | Self::MlDsa65 | Self::MlDsa87 => Some(32),
+
+            Self::Ed448 => Some(57),
 
             Self::Hs256
             | Self::Hs384
@@ -235,7 +259,8 @@ impl SigningAlgorithm {
             | Self::Ps512
             | Self::Es256
             | Self::Es384
-            | Self::Es512 => None,
+            | Self::Es512
+            | Self::Es256k => None,
         }
     }
 
@@ -257,7 +282,9 @@ impl SigningAlgorithm {
             | Self::Es256
             | Self::Es384
             | Self::Es512
+            | Self::Es256k
             | Self::Ed25519
+            | Self::Ed448
             | Self::MlDsa44
             | Self::MlDsa65
             | Self::MlDsa87 => None,
@@ -305,10 +332,12 @@ mod tests {
             SigningAlgorithm::Es256 => 9,
             SigningAlgorithm::Es384 => 10,
             SigningAlgorithm::Es512 => 11,
-            SigningAlgorithm::Ed25519 => 12,
-            SigningAlgorithm::MlDsa44 => 13,
-            SigningAlgorithm::MlDsa65 => 14,
-            SigningAlgorithm::MlDsa87 => 15,
+            SigningAlgorithm::Es256k => 12,
+            SigningAlgorithm::Ed25519 => 13,
+            SigningAlgorithm::Ed448 => 14,
+            SigningAlgorithm::MlDsa44 => 15,
+            SigningAlgorithm::MlDsa65 => 16,
+            SigningAlgorithm::MlDsa87 => 17,
         }
     }
 
@@ -341,7 +370,9 @@ mod tests {
                 "ES256",
                 "ES384",
                 "ES512",
+                "ES256K",
                 "Ed25519",
+                "Ed448",
                 "ML-DSA-44",
                 "ML-DSA-65",
                 "ML-DSA-87"
@@ -381,7 +412,11 @@ mod tests {
             "EDDSA",
             "EdDSA ",
             "ed25519",
-            "Ed448",
+            "ed448",
+            "ED448",
+            "es256k",
+            "ES256k",
+            "ES256K ",
             "ML-DSA44",
             "ml-dsa-44",
         ] {
@@ -424,10 +459,16 @@ mod tests {
             (SigningAlgorithm::Es384, KeyType::Ec, Some(Curve::P384)),
             (SigningAlgorithm::Es512, KeyType::Ec, Some(Curve::P521)),
             (
+                SigningAlgorithm::Es256k,
+                KeyType::Ec,
+                Some(Curve::Secp256k1),
+            ),
+            (
                 SigningAlgorithm::Ed25519,
                 KeyType::Okp,
                 Some(Curve::Ed25519),
             ),
+            (SigningAlgorithm::Ed448, KeyType::Okp, Some(Curve::Ed448)),
             (SigningAlgorithm::MlDsa65, KeyType::Akp, None),
         ];
 
@@ -441,6 +482,10 @@ mod tests {
             (SigningAlgorithm::Es256, KeyType::Okp, Some(Curve::P256)),
             (SigningAlgorithm::Ed25519, KeyType::Okp, Some(Curve::X25519)),
             (SigningAlgorithm::Ed25519, KeyType::Ec, Some(Curve::Ed25519)),
+            (SigningAlgorithm::Ed25519, KeyType::Okp, Some(Curve::Ed448)),
+            (SigningAlgorithm::Ed448, KeyType::Okp, Some(Curve::Ed25519)),
+            (SigningAlgorithm::Es256k, KeyType::Ec, Some(Curve::P256)),
+            (SigningAlgorithm::Es256, KeyType::Ec, Some(Curve::Secp256k1)),
             (SigningAlgorithm::Hs256, KeyType::Rsa, None),
             (SigningAlgorithm::Rs256, KeyType::Oct, None),
         ] {
@@ -467,6 +512,7 @@ mod tests {
             (SigningAlgorithm::Es256, 32),
             (SigningAlgorithm::Es384, 48),
             (SigningAlgorithm::Es512, 66),
+            (SigningAlgorithm::Es256k, 32),
         ] {
             assert_eq!(alg.signature_len(), Some(2 * coordinate), "{alg:?}");
         }
