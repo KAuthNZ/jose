@@ -8,8 +8,15 @@ edition = "2024"
 [dependencies.serde]
 version = "1.0.229"
 
-[dev-dependencies.serde_json]
+# Every JOSE header, JWK and claims set is read through it, with its own checks on top for repeated
+# member names.
+[dependencies.serde_json]
 version = "1.0.154"
+
+# Constant time with respect to the contents, for the secret members of a JWK.
+[dependencies.base64ct]
+version = "1.8.3"
+features = ["alloc"]
 
 [lints.rust]
 unsafe_code = "forbid"
