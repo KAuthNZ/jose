@@ -2,6 +2,8 @@ mod raw;
 
 mod mode;
 
+mod members;
+
 mod decoding;
 
 mod key_types;
@@ -17,6 +19,8 @@ pub use mode::Private;
 pub use mode::Unbound;
 
 pub use raw::RawJwkErrors;
+
+pub use members::KidErrors;
 
 pub use key_types::EcErrors;
 
