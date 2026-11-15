@@ -12,4 +12,14 @@ macro_rules! signing_markers {
     )+};
 }
 
-pub(super) use signing_markers;
+signing_markers!(Hs256, Hs384, Hs512);
+
+signing_markers!(Rs256, Rs384, Rs512);
+
+signing_markers!(Ps256, Ps384, Ps512);
+
+signing_markers!(Es256, Es384, Es512);
+
+signing_markers!(Ed25519);
+
+signing_markers!(MlDsa44, MlDsa65, MlDsa87,);
