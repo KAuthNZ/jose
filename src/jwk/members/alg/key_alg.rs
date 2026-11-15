@@ -138,6 +138,13 @@ impl KeyAlg {
     }
 }
 
+/// For a value the registry already holds, as when every algorithm is tried against a key.
+impl From<Algorithm> for KeyAlg {
+    fn from(alg: Algorithm) -> Self {
+        Self(alg)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
