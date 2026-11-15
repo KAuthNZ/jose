@@ -22,6 +22,8 @@ pub use raw::RawJwkErrors;
 
 pub use members::KidErrors;
 
+pub use members::KeyUseErrors;
+
 pub use key_types::EcErrors;
 
 pub use key_types::ClassificationErrors;
