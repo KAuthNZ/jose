@@ -14,7 +14,7 @@ use crate::jwk::key_types::PublicMembers;
 
 /// The public key of an OKP JWK (RFC 8037 §2): one a real signer could have.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum OkpPublicKey {
+pub enum OkpPublicKey {
     Ed25519(ed25519_dalek::VerifyingKey),
 }
 

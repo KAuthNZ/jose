@@ -19,7 +19,7 @@ use crate::jwk::key_types::PublicMembers;
 /// The public key of an RSA JWK (RFC 7518 §6.3.1): `n` from 2048 to 4096 bits and odd, `e` of
 /// 65537, each a Base64urlUInt without leading zeros.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct RsaPublicKey(PublicKey);
+pub struct RsaPublicKey(PublicKey);
 
 impl RsaPublicKey {
     /// `n` and `e` as they came in the JWK. These rules first, stricter than the backend's.

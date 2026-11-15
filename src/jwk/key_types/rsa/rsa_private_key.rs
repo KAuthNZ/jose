@@ -26,7 +26,7 @@ use super::rsa_private_key_members::RsaPrivateKeyMembers;
 /// be of this key. Kept as the key of the backend, which wipes it on drop.
 ///
 /// Without `Debug` or `Clone` on purpose.
-pub(crate) struct RsaPrivateKey(PrivateKey);
+pub struct RsaPrivateKey(PrivateKey);
 
 impl RsaPrivateKey {
     /// The backend checks `d < n`, `n = p·q` with distinct primes and `d·e ≡ 1` modulo `p − 1`

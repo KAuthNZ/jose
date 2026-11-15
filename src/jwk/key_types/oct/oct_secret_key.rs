@@ -8,7 +8,7 @@ use super::errors::OctErrors;
 /// they are enough for an algorithm is judged with the algorithm.
 ///
 /// Without `Debug` or `Clone` on purpose: `k` is wiped on drop and never printed.
-pub(crate) struct OctSecretKey {
+pub struct OctSecretKey {
     k: Zeroizing<Vec<u8>>,
 }
 

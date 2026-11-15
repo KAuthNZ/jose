@@ -12,7 +12,7 @@ use super::ec_public_key::EcPublicKey;
 /// so they can't be of different curves, and `public` is checked to be the one of `d`.
 ///
 /// Without `Debug` or `Clone` on purpose: `d` is wiped on drop and never printed.
-pub(crate) enum EcPrivateKey {
+pub enum EcPrivateKey {
     P256 {
         d: p256::SecretKey,
 

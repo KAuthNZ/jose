@@ -12,7 +12,7 @@ use super::okp_public_key::OkpPublicKey;
 /// they can't be of different curves, and `public` is checked to be the one of `d`.
 ///
 /// Without `Debug` or `Clone` on purpose: `d` is wiped on drop and never printed.
-pub(crate) enum OkpPrivateKey {
+pub enum OkpPrivateKey {
     Ed25519 {
         d: ed25519_dalek::SigningKey,
 

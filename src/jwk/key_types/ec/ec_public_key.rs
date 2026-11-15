@@ -20,7 +20,7 @@ use crate::jwk::key_types::PublicMembers;
 
 /// The public key of an EC JWK (RFC 7518 §6.2.1): a point of the curve, checked to be on it.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum EcPublicKey {
+pub enum EcPublicKey {
     P256(p256::PublicKey),
 
     P384(p384::PublicKey),
