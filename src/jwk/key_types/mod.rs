@@ -6,6 +6,8 @@ mod okp;
 
 mod rsa;
 
+mod duplicate;
+
 mod public_members;
 
 mod classification;
@@ -35,6 +37,8 @@ pub(crate) use okp::OkpPrivateKey;
 pub(crate) use rsa::RsaPrivateKey;
 
 pub(in crate::jwk) use rsa::RsaPrivateKeyMembers;
+
+pub(crate) use duplicate::Duplicate;
 
 pub(crate) use public_members::PublicMembers;
 

@@ -20,6 +20,8 @@ use super::errors::ClassificationErrors;
 
 use super::any_public_key::AnyPublicKey;
 
+use super::super::duplicate::Duplicate;
+
 /// A key read as private, of any family this library reads: every secret member its family
 /// requires, checked to be the private key of its public members.
 pub enum AnyPrivateKey {
@@ -118,6 +120,18 @@ impl AnyPrivateKey {
             Self::Okp(key) => AnyPublicKey::Okp(key.public()),
 
             Self::Rsa(key) => AnyPublicKey::Rsa(key.public()),
+        }
+    }
+}
+
+impl Duplicate for AnyPrivateKey {
+    fn duplicate(&self) -> Self {
+        match self {
+            Self::Ec(key) => Self::Ec(key.duplicate()),
+
+            Self::Okp(key) => Self::Okp(key.duplicate()),
+
+            Self::Rsa(key) => Self::Rsa(key.duplicate()),
         }
     }
 }

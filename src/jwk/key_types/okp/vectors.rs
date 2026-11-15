@@ -4,6 +4,8 @@
 
 use serde_json::Value;
 
+use super::super::duplicate::Duplicate;
+
 use super::OkpPublicKey;
 
 use super::OkpPrivateKey;
@@ -38,6 +40,8 @@ fn every_ed25519_key_pair_of_rfc_8032_is_read_and_written_back_as_it_came() {
         };
 
         assert_eq!(private.public(), public, "{source}");
+
+        assert_eq!(private.duplicate().public(), public, "{source}");
 
         let written: Value = serde_json::from_str(&public.public_members().to_json()).unwrap();
 

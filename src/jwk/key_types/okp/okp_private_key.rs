@@ -6,12 +6,15 @@ use super::curve::okp_curve;
 
 use super::errors::OkpErrors;
 
+use super::super::duplicate::Duplicate;
+
 use super::okp_public_key::OkpPublicKey;
 
 /// The private key of an OKP JWK (RFC 8037 §2), with its public key. Both are in one variant, so
 /// they can't be of different curves, and `public` is checked to be the one of `d`.
 ///
-/// Without `Debug` or `Clone` on purpose: `d` is wiped on drop and never printed.
+/// Without `Debug` on purpose: `d` is never printed. Not `Clone` either: copied only by
+/// `Duplicate`, each copy wiped on drop.
 pub enum OkpPrivateKey {
     Ed25519 {
         d: ed25519_dalek::SigningKey,
@@ -44,6 +47,17 @@ impl OkpPrivateKey {
     pub(crate) fn public(&self) -> OkpPublicKey {
         match self {
             Self::Ed25519 { public, .. } => OkpPublicKey::Ed25519(*public),
+        }
+    }
+}
+
+impl Duplicate for OkpPrivateKey {
+    fn duplicate(&self) -> Self {
+        match self {
+            Self::Ed25519 { d, public } => Self::Ed25519 {
+                d: d.clone(),
+                public: *public,
+            },
         }
     }
 }

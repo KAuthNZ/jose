@@ -4,10 +4,13 @@ use crate::base64url;
 
 use super::errors::OctErrors;
 
+use super::super::duplicate::Duplicate;
+
 /// The secret of an oct JWK (RFC 7518 §6.4): `k`, decoded. Any bytes but none are a key; whether
 /// they are enough for an algorithm is judged with the algorithm.
 ///
-/// Without `Debug` or `Clone` on purpose: `k` is wiped on drop and never printed.
+/// Without `Debug` on purpose: `k` is never printed. Not `Clone` either: copied only by
+/// `Duplicate`, each copy wiped on drop.
 pub struct OctSecretKey {
     k: Zeroizing<Vec<u8>>,
 }
@@ -36,5 +39,11 @@ impl OctSecretKey {
     /// In bytes.
     pub(crate) fn len(&self) -> usize {
         self.k.len()
+    }
+}
+
+impl Duplicate for OctSecretKey {
+    fn duplicate(&self) -> Self {
+        Self { k: self.k.clone() }
     }
 }

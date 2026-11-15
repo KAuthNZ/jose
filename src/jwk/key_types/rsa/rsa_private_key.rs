@@ -18,6 +18,8 @@ use super::decoding;
 
 use super::errors::RsaErrors;
 
+use super::super::duplicate::Duplicate;
+
 use super::rsa_public_key::RsaPublicKey;
 
 use super::rsa_private_key_members::RsaPrivateKeyMembers;
@@ -25,7 +27,8 @@ use super::rsa_private_key_members::RsaPrivateKeyMembers;
 /// The private key of an RSA JWK (RFC 7518 §6.3.2), every CRT member required, each checked to
 /// be of this key. Kept as the key of the backend, which wipes it on drop.
 ///
-/// Without `Debug` or `Clone` on purpose.
+/// Without `Debug` on purpose. Not `Clone` either: copied only by `Duplicate`, each copy wiped
+/// on drop.
 pub struct RsaPrivateKey(PrivateKey);
 
 impl RsaPrivateKey {
@@ -104,5 +107,11 @@ impl RsaPrivateKey {
     /// The same key without its private members.
     pub(crate) fn public(&self) -> RsaPublicKey {
         RsaPublicKey::from_backend(self.0.to_public_key())
+    }
+}
+
+impl Duplicate for RsaPrivateKey {
+    fn duplicate(&self) -> Self {
+        Self(self.0.clone())
     }
 }

@@ -12,6 +12,8 @@ use super::members::nothing_left;
 
 use super::errors::ClassificationErrors;
 
+use super::super::duplicate::Duplicate;
+
 /// A key read as secret: a symmetric one, the whole key in one member. Only `oct` in JOSE.
 pub enum AnySecretKey {
     Oct(OctSecretKey),
@@ -41,6 +43,14 @@ impl AnySecretKey {
     pub(crate) fn shape(&self) -> KeyShape {
         match self {
             Self::Oct(key) => KeyShape::Oct { len: key.len() },
+        }
+    }
+}
+
+impl Duplicate for AnySecretKey {
+    fn duplicate(&self) -> Self {
+        match self {
+            Self::Oct(key) => Self::Oct(key.duplicate()),
         }
     }
 }

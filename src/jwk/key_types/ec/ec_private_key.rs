@@ -8,10 +8,13 @@ use super::coordinates::key_pair;
 
 use super::ec_public_key::EcPublicKey;
 
+use super::super::duplicate::Duplicate;
+
 /// The private key of an EC JWK (RFC 7518 §6.2.2), with its public key. Both are in one variant,
 /// so they can't be of different curves, and `public` is checked to be the one of `d`.
 ///
-/// Without `Debug` or `Clone` on purpose: `d` is wiped on drop and never printed.
+/// Without `Debug` on purpose: `d` is never printed. Not `Clone` either: copied only by
+/// `Duplicate`, each copy wiped on drop.
 pub enum EcPrivateKey {
     P256 {
         d: p256::SecretKey,
@@ -76,6 +79,27 @@ impl EcPrivateKey {
             Self::P384 { public, .. } => EcPublicKey::P384(*public),
 
             Self::P521 { public, .. } => EcPublicKey::P521(*public),
+        }
+    }
+}
+
+impl Duplicate for EcPrivateKey {
+    fn duplicate(&self) -> Self {
+        match self {
+            Self::P256 { d, public } => Self::P256 {
+                d: d.clone(),
+                public: *public,
+            },
+
+            Self::P384 { d, public } => Self::P384 {
+                d: d.clone(),
+                public: *public,
+            },
+
+            Self::P521 { d, public } => Self::P521 {
+                d: d.clone(),
+                public: *public,
+            },
         }
     }
 }

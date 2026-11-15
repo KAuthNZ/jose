@@ -4,6 +4,8 @@
 
 use serde_json::Value;
 
+use super::super::duplicate::Duplicate;
+
 use super::EcPublicKey;
 
 use super::EcPrivateKey;
@@ -58,7 +60,11 @@ fn every_ec_key_of_the_rfcs_is_read_and_written_back_as_it_came() {
             );
 
             match private {
-                Ok(private) => assert_eq!(private.public(), public, "{}", source(key)),
+                Ok(private) => {
+                    assert_eq!(private.public(), public, "{}", source(key));
+
+                    assert_eq!(private.duplicate().public(), public, "{}", source(key));
+                }
 
                 Err(error) => panic!("{}: {error:?}", source(key)),
             }
