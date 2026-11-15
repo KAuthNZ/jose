@@ -12,6 +12,8 @@ use super::ec_curve_public_key::EcCurvePublicKey;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 /// A private key of curve `C` with its public key, `public` checked to be the one of `d`: what a
 /// key bound to the algorithm of `C` signs with. Both share `C`, so they can't be of different
 /// curves.
@@ -37,11 +39,6 @@ where
 
         Ok(Self { d, public })
     }
-
-    /// The same key without `d`.
-    pub(crate) fn public(&self) -> EcCurvePublicKey<C> {
-        EcCurvePublicKey::from_backend(self.public)
-    }
 }
 
 impl<C> Duplicate for EcCurvePrivateKey<C>
@@ -53,5 +50,17 @@ where
             d: self.d.clone(),
             public: self.public,
         }
+    }
+}
+
+/// The same key without `d`.
+impl<C> PublicSide for EcCurvePrivateKey<C>
+where
+    C: CurveArithmetic,
+{
+    type Public = EcCurvePublicKey<C>;
+
+    fn public(&self) -> EcCurvePublicKey<C> {
+        EcCurvePublicKey::from_backend(self.public)
     }
 }

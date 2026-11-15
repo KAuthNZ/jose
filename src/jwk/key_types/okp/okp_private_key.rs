@@ -6,6 +6,8 @@ use super::errors::OkpErrors;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 use super::okp_public_key::OkpPublicKey;
 
 use super::ed25519_private_key::Ed25519PrivateKey;

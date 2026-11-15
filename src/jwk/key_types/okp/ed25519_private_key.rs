@@ -8,6 +8,8 @@ use super::errors::OkpErrors;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 use super::ed25519_public_key::Ed25519PublicKey;
 
 /// An Ed25519 private key with its public key, `public` checked to be the one of `d`: what a key
@@ -28,11 +30,6 @@ impl Ed25519PrivateKey {
 
         Ok(Self { d, public })
     }
-
-    /// The same key without `d`.
-    pub(crate) fn public(&self) -> Ed25519PublicKey {
-        Ed25519PublicKey::from_backend(self.public)
-    }
 }
 
 impl Duplicate for Ed25519PrivateKey {
@@ -41,5 +38,14 @@ impl Duplicate for Ed25519PrivateKey {
             d: self.d.clone(),
             public: self.public,
         }
+    }
+}
+
+/// The same key without `d`.
+impl PublicSide for Ed25519PrivateKey {
+    type Public = Ed25519PublicKey;
+
+    fn public(&self) -> Ed25519PublicKey {
+        Ed25519PublicKey::from_backend(self.public)
     }
 }

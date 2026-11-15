@@ -22,6 +22,8 @@ use super::any_public_key::AnyPublicKey;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 /// A key read as private, of any family this library reads: every secret member its family
 /// requires, checked to be the private key of its public members.
 pub enum AnyPrivateKey {

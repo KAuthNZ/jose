@@ -7,6 +7,8 @@ use serde_json::Value;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 use super::RsaPublicKey;
 
 use super::RsaPrivateKey;

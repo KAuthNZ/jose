@@ -14,6 +14,8 @@ use super::ec_public_key::EcPublicKey;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 use super::ec_curve_private_key::EcCurvePrivateKey;
 
 /// The private key of an EC JWK (RFC 7518 §6.2.2), with its public key: each curve keeps both,

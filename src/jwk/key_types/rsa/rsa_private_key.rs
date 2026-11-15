@@ -20,6 +20,8 @@ use super::errors::RsaErrors;
 
 use super::super::duplicate::Duplicate;
 
+use super::super::public_side::PublicSide;
+
 use super::rsa_public_key::RsaPublicKey;
 
 use super::rsa_private_key_members::RsaPrivateKeyMembers;
@@ -103,15 +105,19 @@ impl RsaPrivateKey {
             Err(RsaErrors::KeyMismatch)
         }
     }
-
-    /// The same key without its private members.
-    pub(crate) fn public(&self) -> RsaPublicKey {
-        RsaPublicKey::from_backend(self.0.to_public_key())
-    }
 }
 
 impl Duplicate for RsaPrivateKey {
     fn duplicate(&self) -> Self {
         Self(self.0.clone())
+    }
+}
+
+/// The same key without its private members.
+impl PublicSide for RsaPrivateKey {
+    type Public = RsaPublicKey;
+
+    fn public(&self) -> RsaPublicKey {
+        RsaPublicKey::from_backend(self.0.to_public_key())
     }
 }

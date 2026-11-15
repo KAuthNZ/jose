@@ -6,6 +6,8 @@ use crate::base64url;
 
 use super::RsaErrors;
 
+use super::super::public_side::PublicSide;
+
 use super::RsaPublicKey;
 
 use super::RsaPrivateKey;

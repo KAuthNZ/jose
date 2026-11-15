@@ -36,6 +36,8 @@ use crate::jwk::mode::Secret;
 
 use crate::jwk::mode::Private;
 
+use crate::jwk::key_types::PublicSide;
+
 use crate::jwk::key_types::AnyPublicKey;
 
 use super::BindErrors;
