@@ -6,6 +6,8 @@ mod holds;
 
 mod errors;
 
+mod to_public;
+
 mod common_members;
 
 mod unbound_material;

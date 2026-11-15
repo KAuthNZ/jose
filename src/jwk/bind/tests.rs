@@ -406,3 +406,71 @@ fn an_rsa_key_that_declares_its_alg_or_use_is_bound_to_those_only() {
         Some(BindErrors::NotACandidate)
     );
 }
+
+#[test]
+fn the_public_key_of_a_bound_ed25519_key_is_the_public_jwk_bound() {
+    let signer = private(json!({
+        "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "d": OKP_D, "kid": "1",
+    }))
+    .bind::<Ed25519>()
+    .unwrap();
+
+    let verifier = signer.public();
+
+    let expected = public(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X }))
+        .bind::<Ed25519>()
+        .unwrap();
+
+    assert_eq!(verifier.kid(), Some("1"));
+
+    assert_eq!(verifier.held, expected.held);
+
+    // The private key is kept: it still signs, and still has the same public key.
+    assert_eq!(signer.public().held, expected.held);
+}
+
+#[test]
+fn the_public_key_of_every_bound_ec_private_key_of_the_rfcs_is_its_public_jwk_bound() {
+    let keys = ec_keys();
+
+    for key in keys.iter().filter(|key| key.get("d").is_some()) {
+        let source = key.get("source").and_then(Value::as_str).unwrap();
+
+        let private = private(ec_jwk(key));
+
+        let public = public(ec_public_jwk(key));
+
+        match key.get("crv").and_then(Value::as_str).unwrap() {
+            "P-256" => assert_eq!(
+                private.bind::<Es256>().unwrap().public().held,
+                public.bind::<Es256>().unwrap().held,
+                "{source}"
+            ),
+
+            "P-384" => assert_eq!(
+                private.bind::<Es384>().unwrap().public().held,
+                public.bind::<Es384>().unwrap().held,
+                "{source}"
+            ),
+
+            "P-521" => assert_eq!(
+                private.bind::<Es512>().unwrap().public().held,
+                public.bind::<Es512>().unwrap().held,
+                "{source}"
+            ),
+
+            other => panic!("{source}: {other}"),
+        }
+    }
+}
+
+#[test]
+fn the_public_key_of_every_bound_rsa_private_key_is_its_public_jwk_bound() {
+    for (source, key) in rsa_keys() {
+        let signer = private(key.clone()).bind::<Ps256>().unwrap();
+
+        let expected = public(rsa_public_jwk(&key)).bind::<Ps256>().unwrap();
+
+        assert_eq!(signer.public().held, expected.held, "{source}");
+    }
+}
