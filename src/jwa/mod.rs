@@ -1,5 +1,7 @@
 mod constants;
 
+mod content_encryption_algorithm;
+
 mod curve;
 
 mod key_type;
@@ -14,13 +16,13 @@ pub use curve::Curve;
 
 pub use key_type::KeyType;
 
-pub use key_management_algorithm::KeyManagementAlgorithm;
-
 pub use signing_algorithm::SigningAlgorithm;
 
-pub use signing_markers::Ed448;
+pub use key_management_algorithm::KeyManagementAlgorithm;
 
-pub use signing_markers::Ed25519;
+pub use content_encryption_algorithm::ContentEncryptionAlgorithm;
+
+pub use signing_markers::{Ed448, Ed25519};
 
 pub use signing_markers::{Hs256, Hs384, Hs512};
 
