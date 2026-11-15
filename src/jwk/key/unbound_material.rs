@@ -9,9 +9,9 @@ use crate::jwk::key_types::Duplicate;
 /// hold a secret. `Clone` only where the material is, `Duplicate` where it is a secret.
 #[derive(Clone)]
 pub struct UnboundMaterial<K> {
-    pub(super) material: K,
+    pub(in crate::jwk) material: K,
 
-    pub(super) candidates: Candidates,
+    pub(in crate::jwk) candidates: Candidates,
 }
 
 impl<K> Duplicate for UnboundMaterial<K>

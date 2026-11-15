@@ -18,3 +18,5 @@ pub use jwk::Jwk;
 pub use errors::JwkErrors;
 
 pub(in crate::jwk) use holds::Holds;
+
+pub(in crate::jwk) use unbound_material::UnboundMaterial;

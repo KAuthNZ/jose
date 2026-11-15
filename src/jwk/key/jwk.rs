@@ -23,9 +23,9 @@ pub struct Jwk<M>
 where
     M: Holds,
 {
-    pub(super) kid: Option<Kid>,
+    pub(in crate::jwk) kid: Option<Kid>,
 
-    pub(super) held: M::Held,
+    pub(in crate::jwk) held: M::Held,
 }
 
 impl<M> Jwk<M>

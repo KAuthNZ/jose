@@ -2,6 +2,8 @@ mod raw;
 
 mod fit;
 
+mod bind;
+
 mod key;
 
 mod mode;
@@ -25,6 +27,8 @@ pub use mode::Unbound;
 pub use key::Jwk;
 
 pub use key::JwkErrors;
+
+pub use bind::BindErrors;
 
 pub use fit::FitErrors;
 
