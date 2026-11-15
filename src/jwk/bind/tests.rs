@@ -2,6 +2,12 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use crate::jwa::Hs256;
+
+use crate::jwa::Hs384;
+
+use crate::jwa::Hs512;
+
 use crate::jwa::Es256;
 
 use crate::jwa::Es384;
@@ -13,6 +19,8 @@ use crate::jwa::Ed25519;
 use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Public;
+
+use crate::jwk::mode::Secret;
 
 use crate::jwk::mode::Private;
 
@@ -203,4 +211,54 @@ fn an_ec_key_is_not_a_candidate_of_another_curve() {
         p256().bind::<Es512>().err(),
         Some(BindErrors::NotACandidate)
     );
+}
+
+// RFC 7517 A.3, the HMAC key: 64 bytes, long enough for every HS.
+const HMAC_K: &str =
+    "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
+
+// The bytes 0 to 31: long enough for HS256 only.
+const K_32: &str = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8";
+
+fn secret(value: Value) -> Jwk<Secret> {
+    Jwk::read_secret(value.to_string().as_bytes()).unwrap()
+}
+
+#[test]
+fn a_secret_long_enough_for_every_hs_is_bound_to_each() {
+    let jwk = secret(json!({ "kty": "oct", "k": HMAC_K, "kid": "hmac" }));
+
+    let hs256 = jwk.duplicate().bind::<Hs256>().unwrap();
+
+    let hs384 = jwk.duplicate().bind::<Hs384>().unwrap();
+
+    let hs512 = jwk.bind::<Hs512>().unwrap();
+
+    for key in [&hs256.held, &hs384.held, &hs512.held] {
+        assert_eq!(key.len(), 64);
+    }
+
+    assert_eq!(hs256.kid(), Some("hmac"));
+}
+
+#[test]
+fn a_secret_too_short_for_an_hs_is_not_its_candidate() {
+    let jwk = || secret(json!({ "kty": "oct", "k": K_32 }));
+
+    assert!(jwk().bind::<Hs256>().is_ok());
+
+    assert_eq!(jwk().bind::<Hs384>().err(), Some(BindErrors::NotACandidate));
+
+    assert_eq!(jwk().bind::<Hs512>().err(), Some(BindErrors::NotACandidate));
+}
+
+#[test]
+fn a_secret_that_declares_its_alg_is_bound_to_that_one_only() {
+    let jwk = || secret(json!({ "kty": "oct", "k": HMAC_K, "alg": "HS384" }));
+
+    assert!(jwk().bind::<Hs384>().is_ok());
+
+    assert_eq!(jwk().bind::<Hs256>().err(), Some(BindErrors::NotACandidate));
+
+    assert_eq!(jwk().bind::<Hs512>().err(), Some(BindErrors::NotACandidate));
 }

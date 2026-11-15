@@ -1,10 +1,14 @@
 mod ec;
 
+mod oct;
+
 mod okp;
 
 mod bound;
 
 mod public;
+
+mod secret;
 
 mod admits;
 
