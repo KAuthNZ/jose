@@ -22,3 +22,5 @@ pub use private::Private;
 pub use unbound::Unbound;
 
 pub(in crate::jwk) use key_mode::KeyMode;
+
+pub(in crate::jwk) use closed_set::ClosedSet;

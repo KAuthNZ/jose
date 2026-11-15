@@ -2,6 +2,8 @@ mod raw;
 
 mod fit;
 
+mod key;
+
 mod mode;
 
 mod members;
