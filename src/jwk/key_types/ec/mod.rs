@@ -11,6 +11,9 @@ mod ec_private_key;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod vectors;
+
 pub use errors::EcErrors;
 
 pub(crate) use ec_public_key::EcPublicKey;
