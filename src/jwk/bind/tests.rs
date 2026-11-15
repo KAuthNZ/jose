@@ -2,6 +2,18 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use crate::jwa::Rs256;
+
+use crate::jwa::Rs384;
+
+use crate::jwa::Rs512;
+
+use crate::jwa::Ps256;
+
+use crate::jwa::Ps384;
+
+use crate::jwa::Ps512;
+
 use crate::jwa::Hs256;
 
 use crate::jwa::Hs384;
@@ -23,6 +35,8 @@ use crate::jwk::mode::Public;
 use crate::jwk::mode::Secret;
 
 use crate::jwk::mode::Private;
+
+use crate::jwk::key_types::AnyPublicKey;
 
 use super::BindErrors;
 
@@ -261,4 +275,132 @@ fn a_secret_that_declares_its_alg_is_bound_to_that_one_only() {
     assert_eq!(jwk().bind::<Hs256>().err(), Some(BindErrors::NotACandidate));
 
     assert_eq!(jwk().bind::<Hs512>().err(), Some(BindErrors::NotACandidate));
+}
+
+const RSA_RFC_KEYS: &str = include_str!("../../../testdata/rsa/rfc_private_keys.json");
+
+const RSA_GENERATED_KEYS: &str = include_str!("../../../testdata/rsa/generated_private_keys.json");
+
+/// The fourteen RSA keys of the testdata as private JWKs: `source` and `short` dropped.
+fn rsa_keys() -> Vec<(String, Value)> {
+    [RSA_RFC_KEYS, RSA_GENERATED_KEYS]
+        .into_iter()
+        .flat_map(|source| match serde_json::from_str(source).unwrap() {
+            Value::Array(keys) => keys,
+
+            other => panic!("not an array: {other}"),
+        })
+        .map(|mut key| {
+            let members = key.as_object_mut().unwrap();
+
+            let source = members
+                .remove("source")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_owned();
+
+            members.remove("short");
+
+            members.insert("kty".to_owned(), json!("RSA"));
+
+            (source, key)
+        })
+        .collect()
+}
+
+/// `n` and `e` alone.
+fn rsa_public_jwk(key: &Value) -> Value {
+    json!({ "kty": "RSA", "n": key.get("n").unwrap(), "e": key.get("e").unwrap() })
+}
+
+#[test]
+fn every_rsa_key_of_the_testdata_is_bound_to_every_rsa_algorithm() {
+    let keys = rsa_keys();
+
+    assert_eq!(keys.len(), 14);
+
+    for (source, key) in &keys {
+        let private = private(key.clone());
+
+        let public = public(rsa_public_jwk(key));
+
+        let expected = match &public.held.material {
+            AnyPublicKey::Rsa(key) => key.clone(),
+
+            _ => panic!("{source}: not RSA"),
+        };
+
+        let bound = [
+            private
+                .duplicate()
+                .bind::<Rs256>()
+                .map(|key| key.held.public()),
+            private
+                .duplicate()
+                .bind::<Rs384>()
+                .map(|key| key.held.public()),
+            private
+                .duplicate()
+                .bind::<Rs512>()
+                .map(|key| key.held.public()),
+            private
+                .duplicate()
+                .bind::<Ps256>()
+                .map(|key| key.held.public()),
+            private
+                .duplicate()
+                .bind::<Ps384>()
+                .map(|key| key.held.public()),
+            private.bind::<Ps512>().map(|key| key.held.public()),
+        ];
+
+        for public in bound {
+            assert_eq!(public.as_ref(), Ok(&expected), "{source}");
+        }
+
+        let publics = [
+            public.clone().bind::<Rs256>().map(|key| key.held),
+            public.clone().bind::<Rs384>().map(|key| key.held),
+            public.clone().bind::<Rs512>().map(|key| key.held),
+            public.clone().bind::<Ps256>().map(|key| key.held),
+            public.clone().bind::<Ps384>().map(|key| key.held),
+            public.bind::<Ps512>().map(|key| key.held),
+        ];
+
+        for public in publics {
+            assert_eq!(public.as_ref(), Ok(&expected), "{source}");
+        }
+    }
+}
+
+#[test]
+fn an_rsa_key_that_declares_its_alg_or_use_is_bound_to_those_only() {
+    let (_, key) = rsa_keys().remove(0);
+
+    let mut rs256 = rsa_public_jwk(&key);
+
+    rs256
+        .as_object_mut()
+        .unwrap()
+        .insert("alg".to_owned(), json!("RS256"));
+
+    assert!(public(rs256.clone()).bind::<Rs256>().is_ok());
+
+    assert_eq!(
+        public(rs256).bind::<Ps256>().err(),
+        Some(BindErrors::NotACandidate)
+    );
+
+    // `use: enc` leaves RSA-OAEP only: no signature algorithm is a candidate.
+    let mut enc = rsa_public_jwk(&key);
+
+    enc.as_object_mut()
+        .unwrap()
+        .insert("use".to_owned(), json!("enc"));
+
+    assert_eq!(
+        public(enc).bind::<Rs256>().err(),
+        Some(BindErrors::NotACandidate)
+    );
 }

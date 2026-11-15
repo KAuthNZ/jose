@@ -4,6 +4,8 @@ mod oct;
 
 mod okp;
 
+mod rsa;
+
 mod bound;
 
 mod public;
