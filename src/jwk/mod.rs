@@ -22,6 +22,10 @@ pub use mode::Private;
 
 pub use mode::Unbound;
 
+pub use key::Jwk;
+
+pub use key::JwkErrors;
+
 pub use fit::FitErrors;
 
 pub use raw::RawJwkErrors;

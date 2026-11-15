@@ -12,23 +12,24 @@ use crate::jwk::key_types::AnySecretKey;
 
 use crate::jwk::key_types::AnyPrivateKey;
 
+use super::unbound_material::UnboundMaterial;
+
 /// What a key of this mode keeps. Here and not in `mode/`, which knows no family.
 ///
 /// `pub` in a module that can't be named from outside the crate, as `ClosedSet`: a public
 /// `Jwk<M>` can be bound by it, and nobody else says what a mode holds.
 pub trait Holds: ClosedSet {
-    type Key;
+    type Held;
 }
 
-/// Unbound: any family, as classification left it.
 impl Holds for Public {
-    type Key = AnyPublicKey;
+    type Held = UnboundMaterial<AnyPublicKey>;
 }
 
 impl Holds for Private {
-    type Key = AnyPrivateKey;
+    type Held = UnboundMaterial<AnyPrivateKey>;
 }
 
 impl Holds for Secret {
-    type Key = AnySecretKey;
+    type Held = UnboundMaterial<AnySecretKey>;
 }

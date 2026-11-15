@@ -127,7 +127,7 @@ impl Candidates {
     }
 
     #[cfg(test)]
-    pub(super) fn algs(&self) -> &[KeyAlg] {
+    pub(in crate::jwk) fn algs(&self) -> &[KeyAlg] {
         &self.0
     }
 }
