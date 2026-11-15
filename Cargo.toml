@@ -31,6 +31,28 @@ version = "3.0.0"
 default-features = false
 features = ["zeroize"]
 
+# P-256, P-384 and P-521: a point read only when it is on its curve, and a `d` only when it is the
+# one of that point.
+[dependencies.p256]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+[dependencies.p384]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+[dependencies.p521]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+# The coordinates of the three curves, read and written through one generic path.
+[dependencies.elliptic-curve]
+version = "0.14.3"
+default-features = false
+
 [lints.rust]
 unsafe_code = "forbid"
 
