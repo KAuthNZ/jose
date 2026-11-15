@@ -18,11 +18,13 @@ pub use key_management_algorithm::KeyManagementAlgorithm;
 
 pub use signing_algorithm::SigningAlgorithm;
 
+pub use signing_markers::Ed448;
+
 pub use signing_markers::Ed25519;
 
 pub use signing_markers::{Hs256, Hs384, Hs512};
 
-pub use signing_markers::{Es256, Es384, Es512};
+pub use signing_markers::{Es256, Es256k, Es384, Es512};
 
 pub use signing_markers::{Ps256, Ps384, Ps512};
 
