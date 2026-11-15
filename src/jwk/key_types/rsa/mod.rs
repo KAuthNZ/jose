@@ -15,6 +15,9 @@ mod rsa_private_key_members;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod vectors;
+
 pub use errors::RsaErrors;
 
 pub(crate) use rsa_public_key::RsaPublicKey;
