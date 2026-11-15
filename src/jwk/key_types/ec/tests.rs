@@ -108,7 +108,7 @@ fn reads_the_public_key_of_rfc_7517() {
 fn reads_the_private_key_of_rfc_7517() {
     let ec = private("P-256", X, Y, D).unwrap();
 
-    assert!(matches!(ec, EcPrivateKey::P256 { .. }));
+    assert!(matches!(ec, EcPrivateKey::P256(_)));
 
     assert_eq!(ec.curve(), Curve::P256);
 }

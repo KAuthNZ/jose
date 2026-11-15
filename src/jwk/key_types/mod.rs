@@ -30,6 +30,10 @@ pub(crate) use rsa::RsaPublicKey;
 
 pub(crate) use ec::EcPrivateKey;
 
+pub(crate) use ec::EcCurvePublicKey;
+
+pub(crate) use ec::EcCurvePrivateKey;
+
 pub(crate) use oct::OctSecretKey;
 
 pub(crate) use okp::OkpPrivateKey;
