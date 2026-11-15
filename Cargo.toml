@@ -24,6 +24,13 @@ version = "1.9.1"
 default-features = false
 features = ["alloc"]
 
+# Ed25519, read so that only a key a real signer could have is accepted: small and mixed order
+# refused, and its secret wiped on drop.
+[dependencies.ed25519-dalek]
+version = "3.0.0"
+default-features = false
+features = ["zeroize"]
+
 [lints.rust]
 unsafe_code = "forbid"
 
