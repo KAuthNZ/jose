@@ -1,3 +1,5 @@
+mod algorithm;
+
 mod constants;
 
 mod content_encryption_algorithm;
@@ -13,6 +15,8 @@ mod signing_algorithm;
 mod signing_markers;
 
 pub use curve::Curve;
+
+pub use algorithm::Algorithm;
 
 pub use key_type::KeyType;
 
