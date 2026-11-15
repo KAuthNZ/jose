@@ -3,6 +3,14 @@ name = "kauthnz-jose"
 version = "0.0.1"
 edition = "2024"
 
+# Without `derive`: each type writes and reads itself through its own name, so the text lives
+# in one place.
+[dependencies.serde]
+version = "1.0.229"
+
+[dev-dependencies.serde_json]
+version = "1.0.154"
+
 [lints.rust]
 unsafe_code = "forbid"
 
