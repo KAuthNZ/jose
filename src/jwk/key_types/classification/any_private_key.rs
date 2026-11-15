@@ -22,7 +22,7 @@ use super::any_public_key::AnyPublicKey;
 
 /// A key read as private, of any family this library reads: every secret member its family
 /// requires, checked to be the private key of its public members.
-pub(crate) enum AnyPrivateKey {
+pub enum AnyPrivateKey {
     Ec(EcPrivateKey),
 
     Okp(OkpPrivateKey),

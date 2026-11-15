@@ -25,7 +25,7 @@ use super::super::public_members::PublicMembers;
 ///
 /// [`AnyPrivateKey`]: super::AnyPrivateKey
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum AnyPublicKey {
+pub enum AnyPublicKey {
     Ec(EcPublicKey),
 
     Okp(OkpPublicKey),

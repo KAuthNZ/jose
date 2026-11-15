@@ -13,7 +13,7 @@ use super::members::nothing_left;
 use super::errors::ClassificationErrors;
 
 /// A key read as secret: a symmetric one, the whole key in one member. Only `oct` in JOSE.
-pub(crate) enum AnySecretKey {
+pub enum AnySecretKey {
     Oct(OctSecretKey),
 }
 
