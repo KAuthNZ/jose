@@ -28,6 +28,10 @@ pub use members::KidErrors;
 
 pub use members::KeyOpsErrors;
 
+pub use members::CoherenceErrors;
+
+pub use members::KeyMetadataErrors;
+
 pub use members::KeyUseErrors;
 
 pub use key_types::EcErrors;
