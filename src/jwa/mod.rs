@@ -4,6 +4,8 @@ mod curve;
 
 mod key_type;
 
+mod key_management_algorithm;
+
 mod signing_algorithm;
 
 mod signing_markers;
@@ -11,6 +13,8 @@ mod signing_markers;
 pub use curve::Curve;
 
 pub use key_type::KeyType;
+
+pub use key_management_algorithm::KeyManagementAlgorithm;
 
 pub use signing_algorithm::SigningAlgorithm;
 
