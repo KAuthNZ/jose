@@ -4,6 +4,8 @@ mod mode;
 
 mod decoding;
 
+mod key_types;
+
 mod constants;
 
 pub use mode::Public;
