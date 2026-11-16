@@ -2,6 +2,8 @@ mod raw;
 
 mod fit;
 
+mod thumbprint;
+
 mod bind;
 
 mod key;
@@ -35,6 +37,8 @@ pub use bind::AnyBoundPublic;
 pub use bind::AnyBoundSecret;
 
 pub use bind::AnyBoundPrivate;
+
+pub use thumbprint::JwkThumbprint;
 
 pub use fit::FitErrors;
 

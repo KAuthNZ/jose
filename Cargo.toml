@@ -66,6 +66,12 @@ version = "0.7.11"
 default-features = false
 features = ["alloc", "zeroize"]
 
+# SHA-256 for JWK thumbprints (RFC 7638). Already in the tree through ed25519-dalek, p256, p384,
+# p521 and rsa.
+[dependencies.sha2]
+version = "0.11.1"
+default-features = false
+
 [lints.rust]
 unsafe_code = "forbid"
 
