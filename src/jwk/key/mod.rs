@@ -6,6 +6,8 @@ mod holds;
 
 mod errors;
 
+mod with_kid;
+
 mod to_public;
 
 mod common_members;
