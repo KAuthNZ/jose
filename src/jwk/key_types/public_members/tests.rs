@@ -34,6 +34,11 @@ fn the_order_of_the_names_is_theirs_and_not_the_order_they_were_given_in() {
     let names: Vec<&str> = members.iter().map(|(name, _)| name).collect();
 
     assert_eq!(names, ["crv", "kty", "x", "y"]);
+
+    assert_eq!(
+        members.to_json(),
+        r#"{"crv":"P-256","kty":"EC","x":"3","y":"4"}"#
+    );
 }
 
 #[test]
