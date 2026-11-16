@@ -72,6 +72,12 @@ features = ["alloc", "zeroize"]
 version = "0.11.1"
 default-features = false
 
+# Randomness for generated keys, straight from the operating system on every platform it builds
+# for. `SysRng` is the TryCryptoRng of rand_core 0.10, the one rand_core already in the tree.
+[dependencies.getrandom]
+version = "0.4.3"
+features = ["sys_rng"]
+
 [lints.rust]
 unsafe_code = "forbid"
 
