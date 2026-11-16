@@ -30,6 +30,12 @@ pub use key::JwkErrors;
 
 pub use bind::BindErrors;
 
+pub use bind::AnyBoundPublic;
+
+pub use bind::AnyBoundSecret;
+
+pub use bind::AnyBoundPrivate;
+
 pub use fit::FitErrors;
 
 pub use raw::RawJwkErrors;

@@ -1,6 +1,14 @@
+use crate::jwa::Hs256;
+
+use crate::jwa::Hs384;
+
+use crate::jwa::Hs512;
+
 use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Secret;
+
+use crate::jwa::SigningAlgorithm;
 
 use crate::jwk::key::UnboundMaterial;
 
@@ -13,6 +21,8 @@ use super::bound::Bound;
 use super::admits::admits;
 
 use super::errors::BindErrors;
+
+use super::any_bound_secret::AnyBoundSecret;
 
 impl Jwk<Secret> {
     /// The key for `A`, as [`Jwk::<Public>::bind`](Jwk::bind). Consumes it: whoever keeps it
@@ -61,5 +71,35 @@ impl Jwk<Secret> {
             kid: self.kid,
             held,
         })
+    }
+
+    /// The key for `alg`, chosen at run time: from configuration, never from the header of a
+    /// token (RFC 8725 §3.1). The one place the value becomes a type; once bound, it is never
+    /// given again. A secret only takes a symmetric one.
+    pub fn bind_to(self, alg: SigningAlgorithm) -> Result<AnyBoundSecret, BindErrors> {
+        match alg {
+            SigningAlgorithm::Hs256 => self.bind::<Hs256>().map(AnyBoundSecret::Hs256),
+
+            SigningAlgorithm::Hs384 => self.bind::<Hs384>().map(AnyBoundSecret::Hs384),
+
+            SigningAlgorithm::Hs512 => self.bind::<Hs512>().map(AnyBoundSecret::Hs512),
+
+            SigningAlgorithm::Ed25519
+            | SigningAlgorithm::Es256
+            | SigningAlgorithm::Es384
+            | SigningAlgorithm::Es512
+            | SigningAlgorithm::Rs256
+            | SigningAlgorithm::Rs384
+            | SigningAlgorithm::Rs512
+            | SigningAlgorithm::Ps256
+            | SigningAlgorithm::Ps384
+            | SigningAlgorithm::Ps512 => Err(BindErrors::NotACandidate),
+
+            SigningAlgorithm::Es256k
+            | SigningAlgorithm::Ed448
+            | SigningAlgorithm::MlDsa44
+            | SigningAlgorithm::MlDsa65
+            | SigningAlgorithm::MlDsa87 => Err(BindErrors::Unsupported),
+        }
     }
 }

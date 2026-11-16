@@ -2,6 +2,8 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use crate::jwa::SigningAlgorithm;
+
 use crate::jwa::Rs256;
 
 use crate::jwa::Rs384;
@@ -41,6 +43,10 @@ use crate::jwk::key_types::PublicSide;
 use crate::jwk::key_types::AnyPublicKey;
 
 use super::BindErrors;
+
+use super::AnyBoundPublic;
+
+use super::AnyBoundSecret;
 
 // RFC 8037 A.1.
 const OKP_X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
@@ -473,4 +479,96 @@ fn the_public_key_of_every_bound_rsa_private_key_is_its_public_jwk_bound() {
 
         assert_eq!(signer.public().held, expected.held, "{source}");
     }
+}
+
+#[test]
+fn a_public_key_is_bound_at_run_time_to_the_algorithm_of_the_configuration() {
+    let jwk = public(json!({ "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "kid": "1" }));
+
+    let key = jwk.bind_to(SigningAlgorithm::Es256).unwrap();
+
+    assert!(matches!(key, AnyBoundPublic::Es256(_)));
+
+    assert_eq!(key.kid(), Some("1"));
+}
+
+#[test]
+fn run_time_binding_refuses_as_the_typed_one_does() {
+    let p256 = || public(json!({ "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y }));
+
+    assert_eq!(
+        p256().bind_to(SigningAlgorithm::Es384).err(),
+        Some(BindErrors::NotACandidate)
+    );
+
+    // What the typed one can't even write: a public key under a symmetric algorithm.
+    assert_eq!(
+        p256().bind_to(SigningAlgorithm::Hs256).err(),
+        Some(BindErrors::NotACandidate)
+    );
+}
+
+#[test]
+fn every_signing_algorithm_of_the_registry_has_an_answer_at_run_time() {
+    let (_, key) = rsa_keys().remove(0);
+
+    for alg in SigningAlgorithm::ALL {
+        let bound = public(rsa_public_jwk(&key)).bind_to(alg).map(|_| ());
+
+        let expected = match alg {
+            SigningAlgorithm::Rs256
+            | SigningAlgorithm::Rs384
+            | SigningAlgorithm::Rs512
+            | SigningAlgorithm::Ps256
+            | SigningAlgorithm::Ps384
+            | SigningAlgorithm::Ps512 => Ok(()),
+
+            SigningAlgorithm::Es256k
+            | SigningAlgorithm::Ed448
+            | SigningAlgorithm::MlDsa44
+            | SigningAlgorithm::MlDsa65
+            | SigningAlgorithm::MlDsa87 => Err(BindErrors::Unsupported),
+
+            _ => Err(BindErrors::NotACandidate),
+        };
+
+        assert_eq!(bound, expected, "{}", alg.name());
+    }
+}
+
+#[test]
+fn a_private_key_bound_at_run_time_gives_its_public_key_without_the_algorithm_again() {
+    let signer = private(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "d": OKP_D }))
+        .bind_to(SigningAlgorithm::Ed25519)
+        .unwrap();
+
+    let expected = public(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X }))
+        .bind::<Ed25519>()
+        .unwrap();
+
+    match signer.public() {
+        AnyBoundPublic::Ed25519(verifier) => assert_eq!(verifier.held, expected.held),
+
+        _ => panic!("another algorithm"),
+    }
+}
+
+#[test]
+fn a_secret_is_bound_at_run_time_to_a_symmetric_algorithm_only() {
+    let jwk = || secret(json!({ "kty": "oct", "k": HMAC_K }));
+
+    assert!(matches!(
+        jwk().bind_to(SigningAlgorithm::Hs512),
+        Ok(AnyBoundSecret::Hs512(_))
+    ));
+
+    assert_eq!(
+        jwk().bind_to(SigningAlgorithm::Es256).err(),
+        Some(BindErrors::NotACandidate)
+    );
+
+    assert_eq!(
+        jwk().bind_to(SigningAlgorithm::MlDsa44).err(),
+        Some(BindErrors::Unsupported)
+    );
 }

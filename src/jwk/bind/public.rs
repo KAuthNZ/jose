@@ -1,6 +1,28 @@
+use crate::jwa::Es256;
+
+use crate::jwa::Es384;
+
+use crate::jwa::Es512;
+
+use crate::jwa::Rs256;
+
+use crate::jwa::Rs384;
+
+use crate::jwa::Rs512;
+
+use crate::jwa::Ps256;
+
+use crate::jwa::Ps384;
+
+use crate::jwa::Ps512;
+
+use crate::jwa::Ed25519;
+
 use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Public;
+
+use crate::jwa::SigningAlgorithm;
 
 use crate::jwk::key::UnboundMaterial;
 
@@ -13,6 +35,8 @@ use super::bound::Bound;
 use super::admits::admits;
 
 use super::errors::BindErrors;
+
+use super::any_bound_public::AnyBoundPublic;
 
 impl Jwk<Public> {
     /// The key for `A`, if `A` is one of its candidates. Consumes it: whoever keeps it clones it.
@@ -64,5 +88,42 @@ impl Jwk<Public> {
             kid: self.kid,
             held,
         })
+    }
+
+    /// The key for `alg`, chosen at run time: from configuration, never from the header of a
+    /// token (RFC 8725 §3.1). The one place the value becomes a type; once bound, it is never
+    /// given again. A public key never takes a symmetric one.
+    pub fn bind_to(self, alg: SigningAlgorithm) -> Result<AnyBoundPublic, BindErrors> {
+        match alg {
+            SigningAlgorithm::Es256 => self.bind::<Es256>().map(AnyBoundPublic::Es256),
+
+            SigningAlgorithm::Es384 => self.bind::<Es384>().map(AnyBoundPublic::Es384),
+
+            SigningAlgorithm::Es512 => self.bind::<Es512>().map(AnyBoundPublic::Es512),
+
+            SigningAlgorithm::Rs256 => self.bind::<Rs256>().map(AnyBoundPublic::Rs256),
+
+            SigningAlgorithm::Rs384 => self.bind::<Rs384>().map(AnyBoundPublic::Rs384),
+
+            SigningAlgorithm::Rs512 => self.bind::<Rs512>().map(AnyBoundPublic::Rs512),
+
+            SigningAlgorithm::Ps256 => self.bind::<Ps256>().map(AnyBoundPublic::Ps256),
+
+            SigningAlgorithm::Ps384 => self.bind::<Ps384>().map(AnyBoundPublic::Ps384),
+
+            SigningAlgorithm::Ps512 => self.bind::<Ps512>().map(AnyBoundPublic::Ps512),
+
+            SigningAlgorithm::Ed25519 => self.bind::<Ed25519>().map(AnyBoundPublic::Ed25519),
+
+            SigningAlgorithm::Hs256 | SigningAlgorithm::Hs384 | SigningAlgorithm::Hs512 => {
+                Err(BindErrors::NotACandidate)
+            }
+
+            SigningAlgorithm::Es256k
+            | SigningAlgorithm::Ed448
+            | SigningAlgorithm::MlDsa44
+            | SigningAlgorithm::MlDsa65
+            | SigningAlgorithm::MlDsa87 => Err(BindErrors::Unsupported),
+        }
     }
 }

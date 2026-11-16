@@ -9,6 +9,9 @@ pub enum BindErrors {
     /// The algorithm is one of the key, but its material is not of that algorithm. Refused
     /// rather than assumed impossible.
     MaterialAndCandidates,
+
+    /// The algorithm is in the registry, but this library does not implement it yet.
+    Unsupported,
 }
 
 impl fmt::Display for BindErrors {
@@ -19,6 +22,8 @@ impl fmt::Display for BindErrors {
             Self::MaterialAndCandidates => {
                 f.write_str("the key takes the algorithm but its material is not of it")
             }
+
+            Self::Unsupported => f.write_str("this library does not implement the algorithm yet"),
         }
     }
 }

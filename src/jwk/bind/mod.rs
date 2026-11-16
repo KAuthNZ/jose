@@ -14,6 +14,12 @@ mod secret;
 
 mod admits;
 
+mod any_bound_public;
+
+mod any_bound_secret;
+
+mod any_bound_private;
+
 mod errors;
 
 mod private;
@@ -22,3 +28,9 @@ mod private;
 mod tests;
 
 pub use errors::BindErrors;
+
+pub use any_bound_public::AnyBoundPublic;
+
+pub use any_bound_secret::AnyBoundSecret;
+
+pub use any_bound_private::AnyBoundPrivate;
