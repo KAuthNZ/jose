@@ -4,7 +4,7 @@ use crate::jwk::key::Holds;
 
 use crate::jwk::key_types::Publishes;
 
-use super::jwk_thumbprint::JwkThumbprint;
+use super::jwk_thumbprint::Thumbprint;
 
 impl<M> Jwk<M>
 where
@@ -35,7 +35,7 @@ where
     /// let thumbprint = secret.thumbprint();
     /// # Ok::<(), kauthnz_jose::jwk::JwkErrors>(())
     /// ```
-    pub fn thumbprint(&self) -> JwkThumbprint {
-        JwkThumbprint::of(&self.held.public_members())
+    pub fn thumbprint(&self) -> Thumbprint {
+        Thumbprint::of(&self.held)
     }
 }

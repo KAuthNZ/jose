@@ -38,7 +38,7 @@ pub use bind::AnyBoundSecret;
 
 pub use bind::AnyBoundPrivate;
 
-pub use thumbprint::JwkThumbprint;
+pub use thumbprint::Thumbprint;
 
 pub use fit::FitErrors;
 

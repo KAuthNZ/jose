@@ -5,4 +5,4 @@ mod thumbprint_jwk;
 #[cfg(test)]
 mod tests;
 
-pub use jwk_thumbprint::JwkThumbprint;
+pub use jwk_thumbprint::Thumbprint;
