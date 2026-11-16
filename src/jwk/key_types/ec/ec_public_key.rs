@@ -10,6 +10,8 @@ use super::curve::ec_curve;
 
 use super::errors::EcErrors;
 
+use crate::jwk::key_types::Publishes;
+
 use crate::jwk::key_types::PublicMembers;
 
 use super::ec_curve_public_key::EcCurvePublicKey;
@@ -47,14 +49,16 @@ impl EcPublicKey {
             Self::P521(_) => Curve::P521,
         }
     }
+}
 
-    pub(crate) fn public_members(&self) -> PublicMembers {
+impl Publishes for EcPublicKey {
+    fn public_members(&self) -> PublicMembers {
         match self {
-            Self::P256(key) => key.public_members(Curve::P256),
+            Self::P256(key) => key.public_members(),
 
-            Self::P384(key) => key.public_members(Curve::P384),
+            Self::P384(key) => key.public_members(),
 
-            Self::P521(key) => key.public_members(Curve::P521),
+            Self::P521(key) => key.public_members(),
         }
     }
 }

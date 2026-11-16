@@ -24,6 +24,10 @@ use super::super::duplicate::Duplicate;
 
 use super::super::public_side::PublicSide;
 
+use super::super::public_members::Publishes;
+
+use super::super::public_members::PublicMembers;
+
 /// A key read as private, of any family this library reads: every secret member its family
 /// requires, checked to be the private key of its public members.
 pub enum AnyPrivateKey {
@@ -135,5 +139,12 @@ impl Duplicate for AnyPrivateKey {
 
             Self::Rsa(key) => Self::Rsa(key.duplicate()),
         }
+    }
+}
+
+/// The members of its public key.
+impl Publishes for AnyPrivateKey {
+    fn public_members(&self) -> PublicMembers {
+        self.public().public_members()
     }
 }

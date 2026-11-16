@@ -10,6 +10,8 @@ use super::OkpPublicKey;
 
 use super::OkpPrivateKey;
 
+use super::super::public_members::Publishes;
+
 const RFC8032_KEYS: &str = include_str!("../../../../testdata/okp/rfc8032_ed25519_keys.json");
 
 fn member<'a>(key: &'a Value, name: &str) -> &'a str {

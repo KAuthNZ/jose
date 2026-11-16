@@ -52,6 +52,8 @@ pub(crate) use duplicate::Duplicate;
 
 pub(crate) use public_side::PublicSide;
 
+pub(crate) use public_members::Publishes;
+
 pub(crate) use public_members::PublicMembers;
 
 pub(crate) use classification::KeyShape;

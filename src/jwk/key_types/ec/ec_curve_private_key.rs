@@ -8,6 +8,12 @@ use super::errors::EcErrors;
 
 use super::coordinates::key_pair;
 
+use super::named_curve::NamedCurve;
+
+use crate::jwk::key_types::Publishes;
+
+use crate::jwk::key_types::PublicMembers;
+
 use super::ec_curve_public_key::EcCurvePublicKey;
 
 use super::super::duplicate::Duplicate;
@@ -62,5 +68,15 @@ where
 
     fn public(&self) -> EcCurvePublicKey<C> {
         EcCurvePublicKey::from_backend(self.public)
+    }
+}
+
+/// The members of its public key.
+impl<C> Publishes for EcCurvePrivateKey<C>
+where
+    C: NamedCurve,
+{
+    fn public_members(&self) -> PublicMembers {
+        self.public().public_members()
     }
 }

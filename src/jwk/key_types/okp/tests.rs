@@ -12,6 +12,8 @@ use super::OkpPublicKey;
 
 use super::OkpPrivateKey;
 
+use super::super::public_members::Publishes;
+
 // RFC 8037 §A.1.
 const X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
 

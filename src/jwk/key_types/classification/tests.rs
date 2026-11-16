@@ -24,6 +24,8 @@ use super::AnySecretKey;
 
 use super::ClassificationErrors;
 
+use super::super::public_members::Publishes;
+
 // RFC 7517 A.1 and A.2, the P-256 key.
 const EC_X: &str = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
 

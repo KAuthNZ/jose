@@ -12,7 +12,7 @@ use crate::jwa::KeyType;
 /// RFC 7638 §3.3 sorts the names in. Not left to `serde_json`, whose `preserve_order` feature
 /// another crate of the build could turn on.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct PublicMembers {
+pub struct PublicMembers {
     members: BTreeMap<&'static str, String>,
 }
 

@@ -10,6 +10,8 @@ use super::EcPublicKey;
 
 use super::EcPrivateKey;
 
+use super::super::public_members::Publishes;
+
 const RFC_KEYS: &str = include_str!("../../../../testdata/ec/rfc_keys.json");
 
 fn member<'a>(key: &'a Value, name: &str) -> &'a str {

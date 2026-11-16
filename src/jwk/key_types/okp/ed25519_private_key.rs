@@ -6,6 +6,10 @@ use super::ed25519;
 
 use super::errors::OkpErrors;
 
+use crate::jwk::key_types::Publishes;
+
+use crate::jwk::key_types::PublicMembers;
+
 use super::super::duplicate::Duplicate;
 
 use super::super::public_side::PublicSide;
@@ -47,5 +51,12 @@ impl PublicSide for Ed25519PrivateKey {
 
     fn public(&self) -> Ed25519PublicKey {
         Ed25519PublicKey::from_backend(self.public)
+    }
+}
+
+/// The members of its public key.
+impl Publishes for Ed25519PrivateKey {
+    fn public_members(&self) -> PublicMembers {
+        self.public().public_members()
     }
 }

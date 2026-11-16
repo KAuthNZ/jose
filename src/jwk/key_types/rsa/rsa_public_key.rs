@@ -14,6 +14,8 @@ use super::decoding;
 
 use super::errors::RsaErrors;
 
+use crate::jwk::key_types::Publishes;
+
 use crate::jwk::key_types::PublicMembers;
 
 /// The public key of an RSA JWK (RFC 7518 §6.3.1): `n` from 2048 to 4096 bits and odd, `e` of
@@ -58,10 +60,12 @@ impl RsaPublicKey {
             .and_then(|bits| u32::try_from(bits).ok())
             .ok_or(RsaErrors::TooLong)
     }
+}
 
-    /// `n` and `e` as the Base64urlUInt they were read as (RFC 7518 §6.3.1), leading zeros
-    /// trimmed. Variable time, on public values only.
-    pub(crate) fn public_members(&self) -> PublicMembers {
+/// `n` and `e` as the Base64urlUInt they were read as (RFC 7518 §6.3.1), leading zeros
+/// trimmed. Variable time, on public values only.
+impl Publishes for RsaPublicKey {
+    fn public_members(&self) -> PublicMembers {
         PublicMembers::new(KeyType::Rsa)
             .with("n", base64url::encode(&self.0.n_bytes()))
             .with("e", base64url::encode(&self.0.e_bytes()))

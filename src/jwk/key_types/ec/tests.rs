@@ -20,6 +20,8 @@ use super::EcPublicKey;
 
 use super::EcPrivateKey;
 
+use super::super::public_members::Publishes;
+
 // RFC 7517 §A.1 and §A.2: the same P-256 key, public and private.
 const X: &str = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
 

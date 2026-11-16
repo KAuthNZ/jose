@@ -4,6 +4,8 @@ mod errors;
 
 mod coordinates;
 
+mod named_curve;
+
 mod ec_public_key;
 
 mod ec_curve_public_key;

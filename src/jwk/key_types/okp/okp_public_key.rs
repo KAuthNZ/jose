@@ -1,12 +1,10 @@
-use crate::base64url;
-
 use crate::jwa::Curve;
-
-use crate::jwa::KeyType;
 
 use super::curve::okp_curve;
 
 use super::errors::OkpErrors;
+
+use crate::jwk::key_types::Publishes;
 
 use crate::jwk::key_types::PublicMembers;
 
@@ -33,13 +31,12 @@ impl OkpPublicKey {
             Self::Ed25519(_) => Curve::Ed25519,
         }
     }
+}
 
-    /// `x` is the 32 bytes of the encoded point (RFC 8037 §2).
-    pub(crate) fn public_members(&self) -> PublicMembers {
+impl Publishes for OkpPublicKey {
+    fn public_members(&self) -> PublicMembers {
         match self {
-            Self::Ed25519(key) => PublicMembers::new(KeyType::Okp)
-                .with("crv", Curve::Ed25519.name().to_owned())
-                .with("x", base64url::encode(key.as_bytes())),
+            Self::Ed25519(key) => key.public_members(),
         }
     }
 }

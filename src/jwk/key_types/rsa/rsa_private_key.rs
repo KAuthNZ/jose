@@ -18,6 +18,10 @@ use super::decoding;
 
 use super::errors::RsaErrors;
 
+use crate::jwk::key_types::Publishes;
+
+use crate::jwk::key_types::PublicMembers;
+
 use super::super::duplicate::Duplicate;
 
 use super::super::public_side::PublicSide;
@@ -119,5 +123,12 @@ impl PublicSide for RsaPrivateKey {
 
     fn public(&self) -> RsaPublicKey {
         RsaPublicKey::from_backend(self.0.to_public_key())
+    }
+}
+
+/// The members of its public key.
+impl Publishes for RsaPrivateKey {
+    fn public_members(&self) -> PublicMembers {
+        self.public().public_members()
     }
 }

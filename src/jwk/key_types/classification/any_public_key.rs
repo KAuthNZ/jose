@@ -18,6 +18,8 @@ use super::members::nothing_left;
 
 use super::errors::ClassificationErrors;
 
+use super::super::public_members::Publishes;
+
 use super::super::public_members::PublicMembers;
 
 /// A key read as public, of any family this library reads. With [`AnyPrivateKey`], the one
@@ -90,9 +92,11 @@ impl AnyPublicKey {
             Self::Rsa(_) => KeyShape::Rsa,
         }
     }
+}
 
-    /// What an unbound public JWK writes: the members of whichever family it is.
-    pub(crate) fn public_members(&self) -> PublicMembers {
+/// What an unbound public JWK writes: the members of whichever family it is.
+impl Publishes for AnyPublicKey {
+    fn public_members(&self) -> PublicMembers {
         match self {
             Self::Ec(key) => key.public_members(),
 

@@ -6,13 +6,15 @@ use elliptic_curve::point::AffineCoordinates;
 
 use crate::base64url;
 
-use crate::jwa::Curve;
-
 use crate::jwa::KeyType;
 
 use super::errors::EcErrors;
 
 use super::coordinates::public_key;
+
+use super::named_curve::NamedCurve;
+
+use crate::jwk::key_types::Publishes;
 
 use crate::jwk::key_types::PublicMembers;
 
@@ -38,14 +40,19 @@ where
     pub(super) fn from_backend(key: PublicKey<C>) -> Self {
         Self(key)
     }
+}
 
-    /// `x` and `y` the full size of the field, leading zeros kept (RFC 7518 §6.2.1.2-3): the
-    /// affine coordinates come as field bytes, never as a trimmed integer.
-    pub(super) fn public_members(&self, crv: Curve) -> PublicMembers {
+/// `x` and `y` the full size of the field, leading zeros kept (RFC 7518 §6.2.1.2-3): the
+/// affine coordinates come as field bytes, never as a trimmed integer.
+impl<C> Publishes for EcCurvePublicKey<C>
+where
+    C: NamedCurve,
+{
+    fn public_members(&self) -> PublicMembers {
         let point = self.0.as_affine();
 
         PublicMembers::new(KeyType::Ec)
-            .with("crv", crv.name().to_owned())
+            .with("crv", C::CURVE.name().to_owned())
             .with("x", base64url::encode(&point.x()))
             .with("y", base64url::encode(&point.y()))
     }

@@ -15,6 +15,8 @@ use super::RsaPrivateKey;
 
 use super::RsaPrivateKeyMembers;
 
+use super::super::public_members::Publishes;
+
 /// RFC 7515 A.2, RFC 7516 A.1.3 and A.2.3, RFC 7520 3.4, 5.1.1, 5.2.1 (4096 bits) and 6.1.
 const RFC_KEYS: &str = include_str!("../../../../testdata/rsa/rfc_private_keys.json");
 
