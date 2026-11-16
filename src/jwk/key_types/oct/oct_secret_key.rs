@@ -32,6 +32,11 @@ impl OctSecretKey {
     }
 
     /// For the MAC it keys; the bytes stay in this buffer, wiped on drop.
+    /// A secret of random bytes, generated for an algorithm that takes its size.
+    pub(crate) fn generated(k: Zeroizing<Vec<u8>>) -> Self {
+        Self { k }
+    }
+
     pub(crate) fn secret(&self) -> &[u8] {
         &self.k
     }

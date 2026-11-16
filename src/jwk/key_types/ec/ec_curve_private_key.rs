@@ -45,6 +45,13 @@ where
 
         Ok(Self { d, public })
     }
+
+    /// A key from a secret the backend generated: its public key derived from it.
+    pub(crate) fn from_secret(d: SecretKey<C>) -> Self {
+        let public = d.public_key();
+
+        Self { d, public }
+    }
 }
 
 impl<C> Duplicate for EcCurvePrivateKey<C>

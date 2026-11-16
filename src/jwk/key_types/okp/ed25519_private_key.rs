@@ -34,6 +34,15 @@ impl Ed25519PrivateKey {
 
         Ok(Self { d, public })
     }
+
+    /// A key from a seed: any 32 bytes are one (RFC 8032 §5.1.5).
+    pub(crate) fn from_seed(seed: &[u8; 32]) -> Self {
+        let d = SigningKey::from_bytes(seed);
+
+        let public = d.verifying_key();
+
+        Self { d, public }
+    }
 }
 
 impl Duplicate for Ed25519PrivateKey {

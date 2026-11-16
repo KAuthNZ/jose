@@ -2,6 +2,8 @@ mod raw;
 
 mod fit;
 
+mod generate;
+
 mod thumbprint;
 
 mod bind;
@@ -39,6 +41,10 @@ pub use bind::AnyBoundSecret;
 pub use bind::AnyBoundPrivate;
 
 pub use thumbprint::Thumbprint;
+
+pub use generate::RsaModulus;
+
+pub use generate::GenerateErrors;
 
 pub use fit::FitErrors;
 

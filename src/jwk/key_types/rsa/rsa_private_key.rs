@@ -109,6 +109,16 @@ impl RsaPrivateKey {
             Err(RsaErrors::KeyMismatch)
         }
     }
+
+    /// A key the backend generated, held to the rules a key read from a JWK is held to: one
+    /// rule for every key, whatever made it.
+    pub(crate) fn generated(key: PrivateKey) -> Result<Self, RsaErrors> {
+        key_rules::modulus(&key.n_bytes())?;
+
+        key_rules::public_exponent(&key.e_bytes())?;
+
+        Ok(Self(key))
+    }
 }
 
 impl Duplicate for RsaPrivateKey {
