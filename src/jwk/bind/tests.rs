@@ -485,7 +485,7 @@ fn the_public_key_of_every_bound_rsa_private_key_is_its_public_jwk_bound() {
 fn a_public_key_is_bound_at_run_time_to_the_algorithm_of_the_configuration() {
     let jwk = public(json!({ "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "kid": "1" }));
 
-    let key = jwk.bind_to(SigningAlgorithm::Es256).unwrap();
+    let key = jwk.bind_expected(SigningAlgorithm::Es256).unwrap();
 
     assert!(matches!(key, AnyBoundPublic::Es256(_)));
 
@@ -497,13 +497,13 @@ fn run_time_binding_refuses_as_the_typed_one_does() {
     let p256 = || public(json!({ "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y }));
 
     assert_eq!(
-        p256().bind_to(SigningAlgorithm::Es384).err(),
+        p256().bind_expected(SigningAlgorithm::Es384).err(),
         Some(BindErrors::NotACandidate)
     );
 
     // What the typed one can't even write: a public key under a symmetric algorithm.
     assert_eq!(
-        p256().bind_to(SigningAlgorithm::Hs256).err(),
+        p256().bind_expected(SigningAlgorithm::Hs256).err(),
         Some(BindErrors::NotACandidate)
     );
 }
@@ -513,7 +513,7 @@ fn every_signing_algorithm_of_the_registry_has_an_answer_at_run_time() {
     let (_, key) = rsa_keys().remove(0);
 
     for alg in SigningAlgorithm::ALL {
-        let bound = public(rsa_public_jwk(&key)).bind_to(alg).map(|_| ());
+        let bound = public(rsa_public_jwk(&key)).bind_expected(alg).map(|_| ());
 
         let expected = match alg {
             SigningAlgorithm::Rs256
@@ -539,7 +539,7 @@ fn every_signing_algorithm_of_the_registry_has_an_answer_at_run_time() {
 #[test]
 fn a_private_key_bound_at_run_time_gives_its_public_key_without_the_algorithm_again() {
     let signer = private(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "d": OKP_D }))
-        .bind_to(SigningAlgorithm::Ed25519)
+        .bind_expected(SigningAlgorithm::Ed25519)
         .unwrap();
 
     let expected = public(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X }))
@@ -558,17 +558,17 @@ fn a_secret_is_bound_at_run_time_to_a_symmetric_algorithm_only() {
     let jwk = || secret(json!({ "kty": "oct", "k": HMAC_K }));
 
     assert!(matches!(
-        jwk().bind_to(SigningAlgorithm::Hs512),
+        jwk().bind_expected(SigningAlgorithm::Hs512),
         Ok(AnyBoundSecret::Hs512(_))
     ));
 
     assert_eq!(
-        jwk().bind_to(SigningAlgorithm::Es256).err(),
+        jwk().bind_expected(SigningAlgorithm::Es256).err(),
         Some(BindErrors::NotACandidate)
     );
 
     assert_eq!(
-        jwk().bind_to(SigningAlgorithm::MlDsa44).err(),
+        jwk().bind_expected(SigningAlgorithm::MlDsa44).err(),
         Some(BindErrors::Unsupported)
     );
 }

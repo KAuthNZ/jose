@@ -61,10 +61,11 @@ impl Jwk<Private> {
         })
     }
 
-    /// The key for `alg`, chosen at run time: from configuration, never from the header of a
-    /// token (RFC 8725 §3.1). The one place the value becomes a type; once bound, it is never
-    /// given again. A private key never takes a symmetric one.
-    pub fn bind_to(self, alg: SigningAlgorithm) -> Result<AnyBoundPrivate, BindErrors> {
+    /// The key for the algorithm the caller expects, chosen at run time: from its configuration,
+    /// or from an allowlist it checked, as for the `alg` of a DPoP proof. Never one a token picks
+    /// for a key the caller trusts (RFC 8725 §3.1). The one place the value becomes a type; once
+    /// bound, it is never given again. A private key never takes a symmetric one.
+    pub fn bind_expected(self, alg: SigningAlgorithm) -> Result<AnyBoundPrivate, BindErrors> {
         match alg {
             SigningAlgorithm::Ed25519 => self.bind::<Ed25519>().map(AnyBoundPrivate::Ed25519),
 
