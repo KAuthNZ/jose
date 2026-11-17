@@ -34,6 +34,14 @@ pub use key::Jwk;
 
 pub use key::JwkErrors;
 
+pub use set::JwkSet;
+
+pub use set::GetErrors;
+
+pub use set::JwkSetErrors;
+
+pub use set::DiscardedKey;
+
 pub use bind::BindErrors;
 
 pub use bind::AnyBoundPublic;

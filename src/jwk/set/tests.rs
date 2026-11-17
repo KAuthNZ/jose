@@ -6,6 +6,8 @@ use super::JwkSet;
 
 use super::DiscardedKey;
 
+use super::GetErrors;
+
 use super::constants::MAX_KEYS;
 
 use super::entries::entries;
@@ -403,4 +405,59 @@ fn a_key_left_out_is_not_counted_for_the_kid_rules() {
     assert_eq!(kids(&set), [None]);
 
     assert_eq!(set.discarded().len(), 1);
+}
+
+#[test]
+fn a_key_is_taken_out_by_its_kid() {
+    let set = read_public(&json!({ "keys": [okp("a"), okp("b")] })).unwrap();
+
+    assert_eq!(set.get(Some("b")).unwrap().kid(), Some("b"));
+
+    assert_eq!(set.get(Some("a")).unwrap().kid(), Some("a"));
+}
+
+#[test]
+fn a_kid_is_compared_exactly() {
+    let set = read_public(&json!({ "keys": [okp("a"), okp("b")] })).unwrap();
+
+    for kid in ["A", "a ", " a", "", "c"] {
+        assert_eq!(
+            set.get(Some(kid)).err(),
+            Some(GetErrors::UnknownKid),
+            "{kid:?}"
+        );
+    }
+}
+
+#[test]
+fn without_a_kid_only_the_key_of_a_set_of_one_is_taken_out() {
+    let one = read_public(&json!({ "keys": [okp("a")] })).unwrap();
+
+    assert_eq!(one.get(None).unwrap().kid(), Some("a"));
+
+    let two = read_public(&json!({ "keys": [okp("a"), okp("b")] })).unwrap();
+
+    assert_eq!(two.get(None).err(), Some(GetErrors::KidRequired));
+}
+
+#[test]
+fn a_key_without_kid_is_not_found_by_one() {
+    let without_kid = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X });
+
+    let set = read_public(&json!({ "keys": [without_kid] })).unwrap();
+
+    assert_eq!(set.get(Some("a")).err(), Some(GetErrors::UnknownKid));
+
+    assert_eq!(set.get(None).unwrap().kid(), None);
+}
+
+#[test]
+fn a_key_taken_out_leaves_the_set_as_it_was() {
+    let set = read_public(&json!({ "keys": [okp("a"), okp("b")] })).unwrap();
+
+    let taken = set.get(Some("a")).unwrap();
+
+    assert_eq!(kids(&set), [Some("a"), Some("b")]);
+
+    assert_eq!(taken.thumbprint(), set.get(Some("a")).unwrap().thumbprint());
 }
