@@ -16,11 +16,15 @@ use crate::jwa::Rs256;
 
 use crate::jwa::Ed25519;
 
+use crate::jwa::Algorithm;
+
 use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Secret;
 
 use crate::jwk::mode::Private;
+
+use crate::jwk::members::KeyAlg;
 
 use crate::jwk::members::KidErrors;
 
@@ -48,9 +52,11 @@ fn a_generated_ed25519_key_has_its_thumbprint_as_kid_and_reads_back() {
 
     assert_eq!(signer.kid(), Some(thumbprint.as_str()));
 
-    let read = read_back(signer.held.public_members().thumbprint_json())
-        .bind::<Ed25519>()
-        .unwrap();
+    let read = read_back(signer.to_public_json());
+
+    assert_eq!(read.kid(), signer.kid());
+
+    let read = read.bind::<Ed25519>().unwrap();
 
     assert_eq!(read.held, signer.public().held);
 
@@ -71,15 +77,15 @@ fn a_generated_ec_key_of_each_curve_has_its_thumbprint_as_kid_and_reads_back() {
 
     assert_eq!(es512.kid(), Some(es512.thumbprint().to_string().as_str()));
 
-    let read = read_back(es256.held.public_members().thumbprint_json());
+    let read = read_back(es256.to_public_json());
 
     assert_eq!(read.bind::<Es256>().unwrap().held, es256.public().held);
 
-    let read = read_back(es384.held.public_members().thumbprint_json());
+    let read = read_back(es384.to_public_json());
 
     assert_eq!(read.bind::<Es384>().unwrap().held, es384.public().held);
 
-    let read = read_back(es512.held.public_members().thumbprint_json());
+    let read = read_back(es512.to_public_json());
 
     assert_eq!(read.bind::<Es512>().unwrap().held, es512.public().held);
 }
@@ -127,7 +133,13 @@ fn a_generated_rsa_key_is_of_its_size_has_its_thumbprint_as_kid_and_reads_back()
 
     assert_eq!(signer.kid(), Some(signer.thumbprint().to_string().as_str()));
 
-    let read = read_back(signer.held.public_members().thumbprint_json());
+    let read = read_back(signer.to_public_json());
+
+    // Without its alg, an RSA key is a candidate for every RS, PS and RSA-OAEP one.
+    assert_eq!(
+        read.held.candidates.algs(),
+        [KeyAlg::from(Algorithm::Signing(Rs256::ALG))]
+    );
 
     let bound = read.bind::<Rs256>().unwrap();
 
