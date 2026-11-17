@@ -43,6 +43,16 @@ pub enum JwkSetErrors {
 
     /// Every key was left out: the first of them, with its reason.
     NoUsableKey(DiscardedKey),
+
+    /// The key at `index` of `keys` has no `kid`, and more than one key was read.
+    MissingKid {
+        index: usize,
+    },
+
+    /// The key at `index` of `keys` has the `kid` of a key before it.
+    DuplicateKid {
+        index: usize,
+    },
 }
 
 impl fmt::Display for JwkSetErrors {
@@ -76,6 +86,12 @@ impl fmt::Display for JwkSetErrors {
                 first.index(),
                 first.error()
             ),
+
+            Self::MissingKid { index } => write!(f, "JWK Set key {index} has no kid"),
+
+            Self::DuplicateKid { index } => {
+                write!(f, "JWK Set key {index} repeats the kid of another key")
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 mod read;
 
+mod kids;
+
 mod errors;
 
 mod entries;

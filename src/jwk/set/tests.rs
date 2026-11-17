@@ -327,3 +327,80 @@ fn the_shape_is_judged_before_any_key() {
         Some(JwkSetErrors::NotAKey { index: 1 })
     );
 }
+
+#[test]
+fn one_key_needs_no_kid() {
+    let without_kid = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X });
+
+    let set = read_public(&json!({ "keys": [without_kid] })).unwrap();
+
+    assert_eq!(kids(&set), [None]);
+}
+
+#[test]
+fn two_keys_of_the_same_alg_without_kid_refuse_the_set() {
+    let ed25519 = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "alg": "Ed25519" });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [ed25519.clone(), ed25519] })).err(),
+        Some(JwkSetErrors::MissingKid { index: 0 })
+    );
+}
+
+#[test]
+fn with_more_than_one_key_each_needs_a_kid() {
+    let without_kid = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), without_kid] })).err(),
+        Some(JwkSetErrors::MissingKid { index: 1 })
+    );
+}
+
+#[test]
+fn a_kid_repeated_refuses_the_set_at_the_second_key() {
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), okp("b"), okp("a")] })).err(),
+        Some(JwkSetErrors::DuplicateKid { index: 2 })
+    );
+}
+
+#[test]
+fn a_kid_repeated_on_keys_of_different_kty_refuses_the_set_too() {
+    // RFC 7517 §4.5 allows it; `get` by kid could not tell them apart.
+    let ec = json!({
+        "kty": "EC", "crv": "P-256", "kid": "a",
+        "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+        "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+    });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), ec] })).err(),
+        Some(JwkSetErrors::DuplicateKid { index: 1 })
+    );
+}
+
+#[test]
+fn the_index_of_a_kid_error_is_its_place_in_keys() {
+    let unknown = json!({ "kty": "nobody knows" });
+
+    let without_kid = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), unknown, without_kid] })).err(),
+        Some(JwkSetErrors::MissingKid { index: 2 })
+    );
+}
+
+#[test]
+fn a_key_left_out_is_not_counted_for_the_kid_rules() {
+    let unknown = json!({ "kty": "nobody knows" });
+
+    let without_kid = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X });
+
+    let set = read_public(&json!({ "keys": [unknown, without_kid] })).unwrap();
+
+    assert_eq!(kids(&set), [None]);
+
+    assert_eq!(set.discarded().len(), 1);
+}

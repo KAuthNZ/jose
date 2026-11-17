@@ -2,6 +2,8 @@ use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Public;
 
+use super::kids::kids;
+
 use super::jwk_set::JwkSet;
 
 use super::entries::entries;
@@ -14,8 +16,8 @@ use super::secret_members::no_secret_members;
 
 impl JwkSet<Public> {
     /// A published JWK Set, as from a `jwks_uri`: its shape, then no secret in any entry, then
-    /// each key. A key that can't be read is left out with its reason; the set is refused only
-    /// if none is left.
+    /// each key, then their `kid`s. A key that can't be read is left out with its reason; the set
+    /// is refused if none is left, or if what is left can't be told apart by `kid`.
     pub fn read_public(source: &[u8]) -> Result<Self, JwkSetErrors> {
         let entries = entries(source)?;
 
@@ -27,7 +29,7 @@ impl JwkSet<Public> {
 
         for (index, entry) in entries.into_iter().enumerate() {
             match Jwk::<Public>::from_members(entry) {
-                Ok(jwk) => keys.push(jwk),
+                Ok(jwk) => keys.push((index, jwk)),
 
                 Err(error) => discarded.push(DiscardedKey::new(index, error)),
             }
@@ -41,6 +43,11 @@ impl JwkSet<Public> {
             });
         }
 
-        Ok(Self { keys, discarded })
+        kids(&keys)?;
+
+        Ok(Self {
+            keys: keys.into_iter().map(|(_, jwk)| jwk).collect(),
+            discarded,
+        })
     }
 }
