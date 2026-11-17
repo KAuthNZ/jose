@@ -2,15 +2,23 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use super::JwkSet;
+
+use super::DiscardedKey;
+
 use super::constants::MAX_KEYS;
 
 use super::entries::entries;
 
 use super::errors::JwkSetErrors;
 
+use crate::jwk::key::JwkErrors;
+
 use super::constants::MAX_JWK_SET_LEN;
 
 use super::secret_members::no_secret_members;
+
+use crate::jwk::key_types::ClassificationErrors;
 
 // RFC 8037 A.2.
 const OKP_X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
@@ -243,4 +251,79 @@ fn a_member_that_only_looks_secret_is_not_one() {
     key["D"] = json!("AA");
 
     assert_eq!(judged(&json!({ "keys": [okp("a"), key] })), Ok(()));
+}
+
+fn read_public(set: &Value) -> Result<JwkSet<crate::jwk::mode::Public>, JwkSetErrors> {
+    JwkSet::read_public(set.to_string().as_bytes())
+}
+
+fn kids(set: &JwkSet<crate::jwk::mode::Public>) -> Vec<Option<&str>> {
+    set.keys.iter().map(|key| key.kid()).collect()
+}
+
+#[test]
+fn every_key_is_read_in_the_order_of_keys() {
+    let set = read_public(&json!({ "keys": [okp("a"), okp("b"), okp("c")] })).unwrap();
+
+    assert_eq!(kids(&set), [Some("a"), Some("b"), Some("c")]);
+
+    assert!(set.discarded().is_empty());
+}
+
+#[test]
+fn a_key_that_cant_be_read_is_left_out_with_its_index_and_reason() {
+    let unknown = json!({ "kty": "nobody knows", "kid": "b" });
+
+    let set = read_public(&json!({ "keys": [okp("a"), unknown, okp("c")] })).unwrap();
+
+    assert_eq!(kids(&set), [Some("a"), Some("c")]);
+
+    assert_eq!(
+        set.discarded(),
+        [DiscardedKey::new(
+            1,
+            JwkErrors::Classification(ClassificationErrors::UnknownKty)
+        )]
+    );
+}
+
+#[test]
+fn a_set_with_no_key_left_is_refused_with_the_first_one_left_out() {
+    let unknown = json!({ "kty": "nobody knows" });
+
+    let without_kty = json!({ "crv": "Ed25519", "x": OKP_X });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [unknown, without_kty] })).err(),
+        Some(JwkSetErrors::NoUsableKey(DiscardedKey::new(
+            0,
+            JwkErrors::Classification(ClassificationErrors::UnknownKty)
+        )))
+    );
+}
+
+#[test]
+fn a_secret_member_refuses_the_set_and_is_not_a_key_left_out() {
+    let private = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "d": "AA", "kid": "b" });
+
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), private] })).err(),
+        Some(JwkSetErrors::SecretMember {
+            index: 1,
+            name: "d"
+        })
+    );
+}
+
+#[test]
+fn the_shape_is_judged_before_any_key() {
+    assert_eq!(
+        read_public(&json!({ "keys": [] })).err(),
+        Some(JwkSetErrors::Empty)
+    );
+
+    assert_eq!(
+        read_public(&json!({ "keys": [okp("a"), "not a key"] })).err(),
+        Some(JwkSetErrors::NotAKey { index: 1 })
+    );
 }

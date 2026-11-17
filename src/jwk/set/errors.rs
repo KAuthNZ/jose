@@ -1,7 +1,9 @@
 use std::fmt;
 
+use super::discarded_key::DiscardedKey;
+
 /// Why a JWK Set is refused whole. A key that can't be read is not one of these: it is left out
-/// of the set, with its reason.
+/// of the set, with its reason, unless no key is left.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum JwkSetErrors {
     /// Longer than 128 KiB, checked before parsing.
@@ -38,6 +40,9 @@ pub enum JwkSetErrors {
 
         name: &'static str,
     },
+
+    /// Every key was left out: the first of them, with its reason.
+    NoUsableKey(DiscardedKey),
 }
 
 impl fmt::Display for JwkSetErrors {
@@ -64,6 +69,13 @@ impl fmt::Display for JwkSetErrors {
             Self::SecretMember { index, name } => {
                 write!(f, "JWK Set entry {index} has the secret member {name}")
             }
+
+            Self::NoUsableKey(first) => write!(
+                f,
+                "JWK Set has no key that could be read, the first refused at entry {}: {}",
+                first.index(),
+                first.error()
+            ),
         }
     }
 }
