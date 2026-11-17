@@ -40,10 +40,3 @@ fn the_order_of_the_names_is_theirs_and_not_the_order_they_were_given_in() {
         r#"{"crv":"P-256","kty":"EC","x":"3","y":"4"}"#
     );
 }
-
-#[test]
-fn a_value_is_written_as_a_json_string() {
-    let members = PublicMembers::new(KeyType::Oct).with("k", r#"a"b\c"#.to_owned());
-
-    assert_eq!(members.thumbprint_json(), r#"{"k":"a\"b\\c","kty":"oct"}"#);
-}

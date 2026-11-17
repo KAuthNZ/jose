@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use serde_json::Value;
+use crate::json::write_object;
 
 use crate::jwk::mode::HoldsAlg;
 
@@ -64,22 +64,6 @@ where
             members.insert("alg", alg.name());
         }
 
-        let mut json = String::from("{");
-
-        for (position, (name, value)) in members.into_iter().enumerate() {
-            if position > 0 {
-                json.push(',');
-            }
-
-            json.push_str(&Value::from(name).to_string());
-
-            json.push(':');
-
-            json.push_str(&Value::from(value).to_string());
-        }
-
-        json.push('}');
-
-        json
+        write_object(&members)
     }
 }

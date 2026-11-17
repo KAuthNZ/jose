@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use serde_json::Value;
+use crate::json::write_object;
 
 use crate::jwa::KeyType;
 
@@ -38,27 +38,11 @@ impl PublicMembers {
     }
 
     /// The JSON RFC 7638 §3 hashes: the members in order, no whitespace, each name and value a
-    /// JSON string. Written by hand so nothing in between can reorder or space it.
+    /// JSON string.
     ///
     /// What is hashed, not what is published: a JWK to publish is
     /// [`Jwk::to_public_json`](crate::jwk::Jwk::to_public_json).
     pub(crate) fn thumbprint_json(&self) -> String {
-        let mut json = String::from("{");
-
-        for (position, (name, value)) in self.iter().enumerate() {
-            if position > 0 {
-                json.push(',');
-            }
-
-            json.push_str(&Value::from(name).to_string());
-
-            json.push(':');
-
-            json.push_str(&Value::from(value).to_string());
-        }
-
-        json.push('}');
-
-        json
+        write_object(&self.members)
     }
 }
