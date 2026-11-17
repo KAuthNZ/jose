@@ -41,7 +41,13 @@ fn an_unbound_mode_holds_no_alg() {
 
 #[test]
 fn a_bound_mode_holds_the_alg_it_was_bound_to() {
-    assert_eq!(<Public<Es256> as HoldsAlg>::ALG, Some(SigningAlgorithm::Es256));
+    assert_eq!(
+        <Public<Es256> as HoldsAlg>::ALG,
+        Some(SigningAlgorithm::Es256)
+    );
 
-    assert_eq!(<Private<Ed25519> as HoldsAlg>::ALG, Some(SigningAlgorithm::Ed25519));
+    assert_eq!(
+        <Private<Ed25519> as HoldsAlg>::ALG,
+        Some(SigningAlgorithm::Ed25519)
+    );
 }
