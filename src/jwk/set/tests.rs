@@ -10,6 +10,8 @@ use super::errors::JwkSetErrors;
 
 use super::constants::MAX_JWK_SET_LEN;
 
+use super::secret_members::no_secret_members;
+
 // RFC 8037 A.2.
 const OKP_X: &str = "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo";
 
@@ -162,4 +164,83 @@ fn an_entry_that_is_not_an_object_is_refused_with_its_index() {
             "{entry}"
         );
     }
+}
+
+fn judged(set: &Value) -> Result<(), JwkSetErrors> {
+    no_secret_members(&entries(set.to_string().as_bytes())?)
+}
+
+#[test]
+fn a_set_of_public_keys_has_no_secret_member() {
+    let rsa = json!({ "kty": "RSA", "n": "AQAB", "e": "AQAB", "kid": "r" });
+
+    assert_eq!(judged(&json!({ "keys": [okp("a"), rsa] })), Ok(()));
+}
+
+#[test]
+fn a_private_key_refuses_the_whole_set_with_its_index_and_member() {
+    let private = json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X, "d": "AA", "kid": "b" });
+
+    assert_eq!(
+        judged(&json!({ "keys": [okp("a"), private] })),
+        Err(JwkSetErrors::SecretMember {
+            index: 1,
+            name: "d"
+        })
+    );
+}
+
+#[test]
+fn every_secret_member_refuses_the_set_whatever_its_kty() {
+    let names = ["d", "dp", "dq", "k", "oth", "p", "priv", "q", "qi"];
+
+    for name in names {
+        let mut key = okp("b");
+
+        key[name] = json!("AA");
+
+        assert_eq!(
+            judged(&json!({ "keys": [okp("a"), key] })),
+            Err(JwkSetErrors::SecretMember { index: 1, name }),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn a_symmetric_key_refuses_the_set() {
+    let secret = json!({ "kty": "oct", "k": "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr8" });
+
+    assert_eq!(
+        judged(&json!({ "keys": [secret, okp("a")] })),
+        Err(JwkSetErrors::SecretMember {
+            index: 0,
+            name: "k"
+        })
+    );
+}
+
+#[test]
+fn the_first_entry_with_a_secret_is_the_one_reported() {
+    let first = json!({ "kty": "EC", "d": "AA" });
+
+    let second = json!({ "kty": "oct", "k": "AA" });
+
+    assert_eq!(
+        judged(&json!({ "keys": [okp("a"), first, second] })),
+        Err(JwkSetErrors::SecretMember {
+            index: 1,
+            name: "d"
+        })
+    );
+}
+
+#[test]
+fn a_member_that_only_looks_secret_is_not_one() {
+    // Names are case-sensitive (RFC 7517 §4): "D" is not registered, and a key drops it.
+    let mut key = okp("b");
+
+    key["D"] = json!("AA");
+
+    assert_eq!(judged(&json!({ "keys": [okp("a"), key] })), Ok(()));
 }

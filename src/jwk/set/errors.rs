@@ -30,6 +30,14 @@ pub enum JwkSetErrors {
     NotAKey {
         index: usize,
     },
+
+    /// The entry at `index` has `name`, a member of the "Private" class (RFC 7517 §8.1.1): a
+    /// published set has no private or symmetric key (OpenID Connect Discovery §3).
+    SecretMember {
+        index: usize,
+
+        name: &'static str,
+    },
 }
 
 impl fmt::Display for JwkSetErrors {
@@ -52,6 +60,10 @@ impl fmt::Display for JwkSetErrors {
             Self::TooManyKeys => f.write_str("JWK Set has too many keys"),
 
             Self::NotAKey { index } => write!(f, "JWK Set entry {index} is not a JSON object"),
+
+            Self::SecretMember { index, name } => {
+                write!(f, "JWK Set entry {index} has the secret member {name}")
+            }
         }
     }
 }
