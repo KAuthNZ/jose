@@ -10,6 +10,8 @@ mod with_kid;
 
 mod to_public;
 
+mod to_public_json;
+
 mod common_members;
 
 mod unbound_material;

@@ -2,6 +2,8 @@ use serde_json::Value;
 
 use serde_json::json;
 
+use crate::jwa::Es256;
+
 use crate::jwa::Algorithm;
 
 use crate::jwa::SigningAlgorithm as Sig;
@@ -299,4 +301,81 @@ fn a_secret_is_duplicated_byte_for_byte() {
     assert_eq!(duplicated.secret(), original.secret());
 
     assert_eq!(copy.held.candidates, jwk.held.candidates);
+}
+
+#[test]
+fn an_unbound_public_key_is_published_without_what_it_declared() {
+    let jwk = public(json!({
+        "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "kid": "2026-11", "alg": "ES256",
+        "use": "sig",
+    }))
+    .unwrap();
+
+    assert_eq!(
+        jwk.to_public_json(),
+        format!(r#"{{"crv":"P-256","kid":"2026-11","kty":"EC","x":"{EC_X}","y":"{EC_Y}"}}"#)
+    );
+}
+
+#[test]
+fn a_key_without_kid_is_published_without_one() {
+    let jwk = public(json!({ "kty": "OKP", "crv": "Ed25519", "x": OKP_X })).unwrap();
+
+    assert_eq!(
+        jwk.to_public_json(),
+        format!(r#"{{"crv":"Ed25519","kty":"OKP","x":"{OKP_X}"}}"#)
+    );
+}
+
+#[test]
+fn a_private_key_publishes_its_public_key_and_never_d() {
+    let jwk = private(json!({
+        "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "d": EC_D, "kid": "2026-11",
+    }))
+    .unwrap();
+
+    let json = jwk.to_public_json();
+
+    assert_eq!(
+        json,
+        format!(r#"{{"crv":"P-256","kid":"2026-11","kty":"EC","x":"{EC_X}","y":"{EC_Y}"}}"#)
+    );
+
+    assert!(!json.contains(EC_D));
+}
+
+#[test]
+fn a_bound_key_publishes_the_alg_it_is_bound_to() {
+    let jwk = private(json!({
+        "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "d": EC_D, "kid": "2026-11",
+    }))
+    .unwrap()
+    .bind::<Es256>()
+    .unwrap();
+
+    let expected = format!(
+        r#"{{"alg":"ES256","crv":"P-256","kid":"2026-11","kty":"EC","x":"{EC_X}","y":"{EC_Y}"}}"#
+    );
+
+    assert_eq!(jwk.to_public_json(), expected);
+
+    assert_eq!(jwk.public().to_public_json(), expected);
+}
+
+#[test]
+fn what_is_published_is_read_back_as_the_same_key() {
+    let signer = private(json!({
+        "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "d": EC_D, "kid": "2026-11",
+    }))
+    .unwrap()
+    .bind::<Es256>()
+    .unwrap();
+
+    let read = Jwk::read_public(signer.to_public_json().as_bytes()).unwrap();
+
+    assert_eq!(read.kid(), Some("2026-11"));
+
+    assert_eq!(read.thumbprint(), signer.thumbprint());
+
+    assert_eq!(read.held.candidates.algs(), [sig(Sig::Es256)]);
 }
