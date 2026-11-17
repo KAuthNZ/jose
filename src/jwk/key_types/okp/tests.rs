@@ -314,7 +314,10 @@ fn the_public_rules_hold_for_a_private_key() {
 #[test]
 fn an_ed25519_key_writes_crv_kty_and_x() {
     assert_eq!(
-        public("Ed25519", X).unwrap().public_members().to_json(),
+        public("Ed25519", X)
+            .unwrap()
+            .public_members()
+            .thumbprint_json(),
         format!(r#"{{"crv":"Ed25519","kty":"OKP","x":"{X}"}}"#)
     );
 }

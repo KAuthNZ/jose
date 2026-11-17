@@ -19,7 +19,7 @@ impl Thumbprint {
     where
         K: Publishes,
     {
-        Self(Sha256::digest(key.public_members().to_json().as_bytes()).into())
+        Self(Sha256::digest(key.public_members().thumbprint_json().as_bytes()).into())
     }
 
     pub fn as_bytes(&self) -> &[u8; 32] {

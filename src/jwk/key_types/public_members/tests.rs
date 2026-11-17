@@ -19,7 +19,7 @@ fn rfc7638_section_3_1_is_written_as_the_rfc_writes_it() {
         .with("e", "AQAB".to_owned());
 
     assert_eq!(
-        members.to_json(),
+        members.thumbprint_json(),
         format!(r#"{{"e":"AQAB","kty":"RSA","n":"{RFC7638_N}"}}"#)
     );
 }
@@ -36,7 +36,7 @@ fn the_order_of_the_names_is_theirs_and_not_the_order_they_were_given_in() {
     assert_eq!(names, ["crv", "kty", "x", "y"]);
 
     assert_eq!(
-        members.to_json(),
+        members.thumbprint_json(),
         r#"{"crv":"P-256","kty":"EC","x":"3","y":"4"}"#
     );
 }
@@ -45,5 +45,5 @@ fn the_order_of_the_names_is_theirs_and_not_the_order_they_were_given_in() {
 fn a_value_is_written_as_a_json_string() {
     let members = PublicMembers::new(KeyType::Oct).with("k", r#"a"b\c"#.to_owned());
 
-    assert_eq!(members.to_json(), r#"{"k":"a\"b\\c","kty":"oct"}"#);
+    assert_eq!(members.thumbprint_json(), r#"{"k":"a\"b\\c","kty":"oct"}"#);
 }

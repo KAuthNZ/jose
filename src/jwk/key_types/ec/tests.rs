@@ -359,7 +359,10 @@ fn the_other_point_of_the_same_x_is_not_the_key_of_d() {
 #[test]
 fn a_p256_key_writes_crv_kty_x_and_y() {
     assert_eq!(
-        public("P-256", X, Y).unwrap().public_members().to_json(),
+        public("P-256", X, Y)
+            .unwrap()
+            .public_members()
+            .thumbprint_json(),
         format!(r#"{{"crv":"P-256","kty":"EC","x":"{X}","y":"{Y}"}}"#)
     );
 }

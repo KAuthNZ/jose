@@ -545,7 +545,7 @@ fn an_unbound_public_key_writes_the_members_of_its_family() {
     };
 
     assert_eq!(
-        key.public_members().to_json(),
+        key.public_members().thumbprint_json(),
         format!(r#"{{"crv":"P-256","kty":"EC","x":"{EC_X}","y":"{EC_Y}"}}"#)
     );
 }

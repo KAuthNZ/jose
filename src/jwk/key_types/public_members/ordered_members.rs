@@ -39,7 +39,10 @@ impl PublicMembers {
 
     /// The JSON RFC 7638 §3 hashes: the members in order, no whitespace, each name and value a
     /// JSON string. Written by hand so nothing in between can reorder or space it.
-    pub(crate) fn to_json(&self) -> String {
+    ///
+    /// What is hashed, not what is published: a JWK to publish is
+    /// [`Jwk::to_public_json`](crate::jwk::Jwk::to_public_json).
+    pub(crate) fn thumbprint_json(&self) -> String {
         let mut json = String::from("{");
 
         for (position, (name, value)) in self.iter().enumerate() {

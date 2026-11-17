@@ -47,7 +47,8 @@ fn every_ec_key_of_the_rfcs_is_read_and_written_back_as_it_came() {
     for key in &keys {
         let public = public(key);
 
-        let written: Value = serde_json::from_str(&public.public_members().to_json()).unwrap();
+        let written: Value =
+            serde_json::from_str(&public.public_members().thumbprint_json()).unwrap();
 
         for name in ["crv", "x", "y"] {
             assert_eq!(written.get(name), key.get(name), "{}: {name}", source(key));

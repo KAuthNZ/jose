@@ -65,7 +65,8 @@ fn every_key_is_read_with_its_public_key(source: &str) {
 
         assert_eq!(private.duplicate().public(), public);
 
-        let written: Value = serde_json::from_str(&public.public_members().to_json()).unwrap();
+        let written: Value =
+            serde_json::from_str(&public.public_members().thumbprint_json()).unwrap();
 
         assert_eq!(written.get("n"), key.get("n"));
 

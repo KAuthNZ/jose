@@ -159,7 +159,7 @@ fn reads_the_public_key_of_rfc_7517() {
     let rsa = public(N, E).unwrap();
 
     assert_eq!(
-        rsa.public_members().to_json(),
+        rsa.public_members().thumbprint_json(),
         format!(r#"{{"e":"AQAB","kty":"RSA","n":"{N}"}}"#)
     );
 }
