@@ -8,6 +8,8 @@ mod unbound;
 
 mod key_mode;
 
+mod holds_alg;
+
 mod closed_set;
 
 #[cfg(test)]
@@ -22,5 +24,7 @@ pub use private::Private;
 pub use unbound::Unbound;
 
 pub(in crate::jwk) use key_mode::KeyMode;
+
+pub(in crate::jwk) use holds_alg::HoldsAlg;
 
 pub(in crate::jwk) use closed_set::ClosedSet;
