@@ -1,18 +1,18 @@
-use serde_json::Map;
-
 use serde_json::Value;
 
 use serde_json::json;
 
 use crate::jwk::constants::KEY_MEMBERS;
 
+use super::ScrubbedMembers;
+
 use super::RawJwk;
 
 use super::RawJwkErrors;
 
-fn members(value: Value) -> Map<String, Value> {
+fn members(value: Value) -> ScrubbedMembers {
     match value {
-        Value::Object(members) => members,
+        Value::Object(members) => ScrubbedMembers::new(members),
 
         other => panic!("not an object: {other}"),
     }

@@ -20,6 +20,8 @@ use crate::jwk::mode::Secret;
 
 use crate::jwk::raw::RawJwk;
 
+use crate::jwk::raw::ScrubbedMembers;
+
 use crate::jwk::members::KeyAlg;
 
 use crate::jwk::members::KeyMetadata;
@@ -257,7 +259,7 @@ fn raw(value: Value) -> RawJwk {
         other => panic!("not an object: {other}"),
     };
 
-    match RawJwk::try_from(members) {
+    match RawJwk::try_from(ScrubbedMembers::new(members)) {
         Ok(raw) => raw,
 
         Err(error) => panic!("raw refused it: {error:?}"),

@@ -2,6 +2,8 @@ use crate::jwk::raw::RawJwk;
 
 use crate::jwk::members::Kid;
 
+use crate::jwk::raw::ScrubbedMembers;
+
 use crate::jwk::raw::KeyMembers;
 
 use crate::jwk::decoding::members;
@@ -24,12 +26,17 @@ pub(super) struct CommonMembers {
 }
 
 impl CommonMembers {
-    /// The cheap judgement first: the metadata are strings, the material is decoded later and
-    /// checked on its curve or modulus.
+    /// From the bytes of one JWK, wrapped as soon as they are parsed.
+    pub(super) fn read(source: &[u8]) -> Result<Self, JwkErrors> {
+        Self::from_members(ScrubbedMembers::new(members(source)?))
+    }
+
+    /// From members already parsed, as each key of a JWK Set is. The cheap judgement first: the
+    /// metadata are strings, the material is decoded later and checked on its curve or modulus.
     ///
     /// `x5u`, `x5c`, `x5t` and `x5t#S256` are dropped unread: nothing here checks a certificate
     /// against the key, so nothing here may let one vouch for it.
-    pub(super) fn read(source: &[u8]) -> Result<Self, JwkErrors> {
+    pub(super) fn from_members(members: ScrubbedMembers) -> Result<Self, JwkErrors> {
         let RawJwk {
             kty,
             kid,
@@ -38,7 +45,7 @@ impl CommonMembers {
             key_ops,
             material,
             ..
-        } = RawJwk::try_from(members(source)?)?;
+        } = RawJwk::try_from(members)?;
 
         let kid = kid.map(Kid::read).transpose()?;
 

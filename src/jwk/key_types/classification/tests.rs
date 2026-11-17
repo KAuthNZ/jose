@@ -8,6 +8,8 @@ use crate::jwa::KeyType;
 
 use crate::jwk::raw::RawJwk;
 
+use crate::jwk::raw::ScrubbedMembers;
+
 use crate::jwk::constants::SECRET_MEMBERS;
 
 use super::super::ec::EcErrors;
@@ -85,7 +87,7 @@ fn raw(value: Value) -> RawJwk {
         other => panic!("not an object: {other}"),
     };
 
-    match RawJwk::try_from(members) {
+    match RawJwk::try_from(ScrubbedMembers::new(members)) {
         Ok(raw) => raw,
 
         Err(error) => panic!("raw refused it: {error:?}"),

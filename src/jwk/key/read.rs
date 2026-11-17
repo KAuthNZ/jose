@@ -6,6 +6,8 @@ use crate::jwk::mode::Private;
 
 use crate::jwk::fit::Candidates;
 
+use crate::jwk::raw::ScrubbedMembers;
+
 use crate::jwk::key_types::AnyPublicKey;
 
 use crate::jwk::key_types::AnySecretKey;
@@ -23,8 +25,15 @@ use super::unbound_material::UnboundMaterial;
 impl Jwk<Public> {
     /// A JWK with its public members only: one with a secret member is refused, not trimmed.
     pub fn read_public(source: &[u8]) -> Result<Self, JwkErrors> {
-        let common = CommonMembers::read(source)?;
+        Self::from_common(CommonMembers::read(source)?)
+    }
 
+    /// From members already parsed, as each key of a JWK Set is.
+    pub(in crate::jwk) fn from_members(members: ScrubbedMembers) -> Result<Self, JwkErrors> {
+        Self::from_common(CommonMembers::from_members(members)?)
+    }
+
+    fn from_common(common: CommonMembers) -> Result<Self, JwkErrors> {
         let public_material = AnyPublicKey::classify(&common.kty, common.material)?;
 
         let candidates = Candidates::of_public(&public_material, &common.metadata)?;

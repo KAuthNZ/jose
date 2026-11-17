@@ -1,7 +1,3 @@
-use serde_json::Map;
-
-use serde_json::Value;
-
 use super::take::take_string;
 
 use super::take::take_strings;
@@ -38,12 +34,12 @@ pub(in crate::jwk) struct RawJwk {
     pub(in crate::jwk) material: KeyMembers,
 }
 
-impl TryFrom<Map<String, Value>> for RawJwk {
+/// From members already wiped on drop: whoever parsed them wrapped them first, so nothing is
+/// freed unwiped on the way here.
+impl TryFrom<ScrubbedMembers> for RawJwk {
     type Error = RawJwkErrors;
 
-    fn try_from(members: Map<String, Value>) -> Result<Self, Self::Error> {
-        let mut members = ScrubbedMembers::new(members);
-
+    fn try_from(mut members: ScrubbedMembers) -> Result<Self, Self::Error> {
         let kty = take_string(&mut members, "kty")?.ok_or(RawJwkErrors::MissingKty)?;
 
         Ok(Self {
