@@ -10,6 +10,8 @@ mod bind;
 
 mod key;
 
+mod set;
+
 mod mode;
 
 mod members;
