@@ -345,7 +345,7 @@ fn a_private_key_publishes_its_public_key_and_never_d() {
 }
 
 #[test]
-fn a_bound_key_publishes_the_alg_it_is_bound_to() {
+fn a_bound_key_publishes_the_alg_it_is_bound_to_and_its_use() {
     let jwk = private(json!({
         "kty": "EC", "crv": "P-256", "x": EC_X, "y": EC_Y, "d": EC_D, "kid": "2026-11",
     }))
@@ -354,7 +354,7 @@ fn a_bound_key_publishes_the_alg_it_is_bound_to() {
     .unwrap();
 
     let expected = format!(
-        r#"{{"alg":"ES256","crv":"P-256","kid":"2026-11","kty":"EC","x":"{EC_X}","y":"{EC_Y}"}}"#
+        r#"{{"alg":"ES256","crv":"P-256","kid":"2026-11","kty":"EC","use":"sig","x":"{EC_X}","y":"{EC_Y}"}}"#
     );
 
     assert_eq!(jwk.to_public_json(), expected);
