@@ -19,6 +19,19 @@ pub enum GenerateErrors {
 
     /// The `kid` it was given is not one a JWK may have.
     Kid(KidErrors),
+
+    /// The algorithm takes a key of another mode: a symmetric one for a private key, or an
+    /// asymmetric one for a secret.
+    NotForThisMode,
+
+    /// The algorithm is in the registry, but this library does not implement it yet.
+    Unsupported,
+
+    /// An RSA algorithm, whose size it does not name: generated with its size.
+    RsaSizeRequired,
+
+    /// Not an RSA algorithm, generated with a size only RSA takes.
+    NotRsa,
 }
 
 impl From<RsaErrors> for GenerateErrors {
@@ -43,6 +56,14 @@ impl fmt::Display for GenerateErrors {
             Self::Rsa(error) => error.fmt(f),
 
             Self::Kid(error) => error.fmt(f),
+
+            Self::NotForThisMode => f.write_str("the algorithm takes a key of another mode"),
+
+            Self::Unsupported => f.write_str("the algorithm is not supported"),
+
+            Self::RsaSizeRequired => f.write_str("an RSA key is generated with its size"),
+
+            Self::NotRsa => f.write_str("only an RSA key is generated with a size"),
         }
     }
 }

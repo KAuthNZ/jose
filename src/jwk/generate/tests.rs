@@ -18,6 +18,8 @@ use crate::jwa::Ed25519;
 
 use crate::jwa::Algorithm;
 
+use crate::jwa::SigningAlgorithm as Sig;
+
 use crate::jwk::key::Jwk;
 
 use crate::jwk::mode::Secret;
@@ -28,11 +30,17 @@ use crate::jwk::members::KeyAlg;
 
 use crate::jwk::members::KidErrors;
 
+use crate::jwk::bind::AnyBoundSecret;
+
+use crate::jwk::bind::AnyBoundPrivate;
+
 use crate::jwk::key_types::Publishes;
 
 use crate::jwa::TypedSigningAlgorithm;
 
 use super::RsaModulus;
+
+use super::GenerateErrors;
 
 /// The public JWK of a generated key, read back as any other: a key this library generates is
 /// one it reads.
@@ -170,4 +178,102 @@ fn with_kid_changes_the_kid_of_the_key_and_holds_it_to_the_rules() {
     assert_eq!(renamed.thumbprint(), thumbprint);
 
     assert_eq!(renamed.with_kid("").err(), Some(KidErrors::Empty));
+}
+
+#[test]
+fn a_key_generated_at_run_time_is_of_the_algorithm_asked() {
+    assert!(matches!(
+        Jwk::<Private>::generate_expected(Sig::Ed25519),
+        Ok(AnyBoundPrivate::Ed25519(_))
+    ));
+
+    assert!(matches!(
+        Jwk::<Private>::generate_expected(Sig::Es256),
+        Ok(AnyBoundPrivate::Es256(_))
+    ));
+
+    assert!(matches!(
+        Jwk::<Private>::generate_expected(Sig::Es384),
+        Ok(AnyBoundPrivate::Es384(_))
+    ));
+
+    assert!(matches!(
+        Jwk::<Private>::generate_expected(Sig::Es512),
+        Ok(AnyBoundPrivate::Es512(_))
+    ));
+}
+
+#[test]
+fn a_private_key_at_run_time_is_never_symmetric_rsa_without_size_or_unsupported() {
+    for (alg, expected) in [
+        (Sig::Hs256, GenerateErrors::NotForThisMode),
+        (Sig::Hs512, GenerateErrors::NotForThisMode),
+        (Sig::Rs256, GenerateErrors::RsaSizeRequired),
+        (Sig::Ps512, GenerateErrors::RsaSizeRequired),
+        (Sig::Ed448, GenerateErrors::Unsupported),
+        (Sig::Es256k, GenerateErrors::Unsupported),
+        (Sig::MlDsa65, GenerateErrors::Unsupported),
+    ] {
+        assert_eq!(
+            Jwk::<Private>::generate_expected(alg).err(),
+            Some(expected),
+            "{alg:?}"
+        );
+    }
+}
+
+#[test]
+fn an_rsa_key_at_run_time_is_of_the_algorithm_and_size_asked() {
+    let key = Jwk::<Private>::generate_rsa_expected(Sig::Ps256, RsaModulus::Bits2048).unwrap();
+
+    let AnyBoundPrivate::Ps256(signer) = key else {
+        panic!("not PS256");
+    };
+
+    let n = signer
+        .held
+        .public_members()
+        .iter()
+        .find_map(|(name, value)| (name == "n").then(|| base64url::decode(value)))
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(n.len() * 8, 2048);
+}
+
+#[test]
+fn only_an_rsa_algorithm_is_generated_with_a_size() {
+    for alg in [Sig::Es256, Sig::Ed25519, Sig::Hs256, Sig::Ed448] {
+        assert_eq!(
+            Jwk::<Private>::generate_rsa_expected(alg, RsaModulus::Bits2048).err(),
+            Some(GenerateErrors::NotRsa),
+            "{alg:?}"
+        );
+    }
+}
+
+#[test]
+fn a_secret_at_run_time_is_of_the_algorithm_asked_and_only_symmetric() {
+    assert!(matches!(
+        Jwk::<Secret>::generate_expected(Sig::Hs256),
+        Ok(AnyBoundSecret::Hs256(_))
+    ));
+
+    assert!(matches!(
+        Jwk::<Secret>::generate_expected(Sig::Hs384),
+        Ok(AnyBoundSecret::Hs384(_))
+    ));
+
+    assert!(matches!(
+        Jwk::<Secret>::generate_expected(Sig::Hs512),
+        Ok(AnyBoundSecret::Hs512(_))
+    ));
+
+    for alg in [Sig::Es256, Sig::Rs256, Sig::Ed25519, Sig::MlDsa44] {
+        assert_eq!(
+            Jwk::<Secret>::generate_expected(alg).err(),
+            Some(GenerateErrors::NotForThisMode),
+            "{alg:?}"
+        );
+    }
 }
