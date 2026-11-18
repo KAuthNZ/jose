@@ -1,0 +1,89 @@
+[package]
+name = "kauthnz-jose"
+version = "0.0.1"
+edition = "2024"
+
+# Without `derive`: each type writes and reads itself through its own name, so the text lives
+# in one place.
+[dependencies.serde]
+version = "1.0.229"
+
+# Every JOSE header, JWK and claims set is read through it, with its own checks on top for repeated
+# member names.
+[dependencies.serde_json]
+version = "1.0.154"
+
+# Constant time with respect to the contents, for the secret members of a JWK.
+[dependencies.base64ct]
+version = "1.8.3"
+features = ["alloc"]
+
+# The members of a JWK, secret or not, wiped once read or refused.
+[dependencies.zeroize]
+version = "1.9.1"
+default-features = false
+features = ["alloc"]
+
+# Ed25519, read so that only a key a real signer could have is accepted: small and mixed order
+# refused, and its secret wiped on drop.
+[dependencies.ed25519-dalek]
+version = "3.0.0"
+default-features = false
+features = ["zeroize"]
+
+# P-256, P-384 and P-521: a point read only when it is on its curve, and a `d` only when it is the
+# one of that point.
+[dependencies.p256]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+[dependencies.p384]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+[dependencies.p521]
+version = "0.14.0"
+default-features = false
+features = ["ecdsa"]
+
+# The coordinates of the three curves, read and written through one generic path.
+[dependencies.elliptic-curve]
+version = "0.14.3"
+default-features = false
+
+# The backend of RSA keys. RUSTSEC-2023-0071 (Marvin) lists 0.10.0 as patched: constant-time
+# arithmetic through crypto-bigint, and its private keys wiped on drop.
+[dependencies.rsa]
+version = "0.10.0"
+default-features = false
+
+# To compare in constant time the dp, dq and qi of a JWK with the ones the backend computes.
+# Already in the tree through elliptic-curve and rsa.
+[dependencies.crypto-bigint]
+version = "0.7.11"
+default-features = false
+features = ["alloc", "zeroize"]
+
+# SHA-256 for JWK thumbprints (RFC 7638). Already in the tree through ed25519-dalek, p256, p384,
+# p521 and rsa.
+[dependencies.sha2]
+version = "0.11.1"
+default-features = false
+
+# Randomness for generated keys, straight from the operating system on every platform it builds
+# for. `SysRng` is the TryCryptoRng of rand_core 0.10, the one rand_core already in the tree.
+[dependencies.getrandom]
+version = "0.4.3"
+features = ["sys_rng"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+panic = "deny"
+expect_used = "deny"
+unwrap_used = "deny"
+indexing_slicing = "deny"
+module_inception = "deny"

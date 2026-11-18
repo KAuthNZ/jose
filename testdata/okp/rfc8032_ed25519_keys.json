@@ -1,0 +1,27 @@
+[
+  {
+    "source": "RFC 8032 7.1 TEST 1",
+    "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+    "d": "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A"
+  },
+  {
+    "source": "RFC 8032 7.1 TEST 2",
+    "x": "PUAXw-hDiVqStwqnTRt-vJyYLM8uxJaMwM1V8Sr0Zgw",
+    "d": "TM0Imyj_ltqdtsNG7BFOD1uKMZ81q6Yk2oz27U-4pvs"
+  },
+  {
+    "source": "RFC 8032 7.1 TEST 3",
+    "x": "_FHNjmIYoaONpH7QAjDwWAgW7RO6MwOsXeuRFUiQgCU",
+    "d": "xaqN9D-fg3vtt0QvMdy3sWbThTUHbwlLhc46LgtEWPc"
+  },
+  {
+    "source": "RFC 8032 7.1 TEST 1024",
+    "x": "J4EX_BRMcjQPZ9DyMW6Dhs7_vyskKMnFH-98WX8dQm4",
+    "d": "9eV2fPFTMZUXYw8iaHa4bIFgzFg7wBN0TGvyVfXMDuU"
+  },
+  {
+    "source": "RFC 8032 7.1 TEST SHA(abc)",
+    "x": "7Bcrk61eVjv0kyxw4SRQNMNUZ-8u_U1k6_gZaDRn4r8",
+    "d": "gz_mJAkje51i7HdYdSCRHpp1nOwdGXVbfakBuW3KPUI"
+  }
+]
